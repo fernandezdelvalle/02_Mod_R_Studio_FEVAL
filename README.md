@@ -1,4 +1,4 @@
-# Python Training
+# R Studio Training
 ed. 03_2021
 
 En este repositorio tendrás acceso a las prácticas/labs/lectures a realizar durante el semestre. Están organizadas por carpetas según el módulo correspondiente y la semana de impartición.
@@ -13,8 +13,14 @@ Los ficheros serán en formato script HTML, texto, fichero R o Python, markdown 
 
 Actualizaré este documento según el calendario en curso:
 
-- [X] Fundamentos de programación general
-- [X] Fundamentos de Python
+- [ ] Fundamentos de programación general
+- [ ] INTRODUCCIÓN A R Y RSTUDIO. INSTALACIÓN Y CONFIGURACIÓN
+- [ ] TIPO DE DATOS Y OPERACIONES. SINTAXIS Y SENTENCIAS DE CONTROL
+- [ ] FUNCIONES, MÓDULOS Y PAQUETES
+- [ ] MANIPULACIÓN Y ANÁLISIS DE DATOS. VERBOS Y ACCIONES
+- [ ] TRATAMIENTO DE FICHEROS ENTRADA/SALIDA. ACCESO A BASE DE DATOS CON R
+- [ ] LIBRERÍAS DE VISUALIZACIÓN DE DATOS: GGPLOT2
+- [ ] TÉCNICAS DE ANÁLISIS EXPLORATORIO DE DATOS (EDA)
 
 
 ***
