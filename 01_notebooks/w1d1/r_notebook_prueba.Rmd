@@ -1,0 +1,117 @@
+---
+title: "R Notebook"
+author: Marco Russo
+output: html_notebook
+---
+
+# Encabezado 1
+normalmente se trabaja siempre con un encabezado para luego introducir lo que estamos realizando. Y podemos comenzar con el formato.
+
+**Negritas**
+
+*cursiva*
+
+***cursiva negrita***
+
+
+## Encabezado 2
+
+- elemento 1
+- elemento 2
+- elemento 3
+-- subelemento 3.1
+--- subelemento 3.11
+
+
+***
+
+
+1. elemento ordenado 1
+2. elemento ordenado 2
+
+3.1 elemento ordenado 3
+
+
+### Encabezado 3
+
+Podemos añadir [enlaces a sitios web o internos](http://www.google.com).
+
+Podemos añadir también referencias a chunks [elemento a enlazar](#)
+
+
+#### Heading 4
+
+Incrustar elementos en código HTML y CSS dentro del propio notebook 
+Las imágenes
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/RStudio_IDE_screenshot.png/300px-RStudio_IDE_screenshot.png)
+
+Y otro recurso interno
+![](../img/List-of-r-packages.png)
+
+##### Heading 5
+
+Finalmente podemos añadir quotes
+
+> Cita de cualquier cosa ....
+
+Si queremos añadir trozo de código
+
+```{python}
+# el propio código de python
+
+```
+
+
+Podemos añadir otra parte de código
+
+'''
+PSEUDO-CÓDIGO
+
+'''
+
+
+También podemos crear tablas en markdown
+
+| Right | Lef | Default | Center | 
+|------:|:-----|---------|:------:| 
+| 12 | 12 | 12 | 12 | 
+| 123 | 123 | 123 | 123 | 
+| 1 | 1 | 1 | 1 |
+
+
+
+También podemos añadir una lista de tareas
+
+- [ ] Tarea 1
+- [ ] Tarea 2
+- [X] Tarea 3
+
+
+***
+
+* * *
+
+
+## Comezamos con la parte de los chunks
+
+
+```{r}
+# Esta es una línea de comentario
+texto = "parte del código" # otra línea de comentario
+text_2 <- "otra parte del código"
+```
+
+
+
+
+
+```{r}
+plot(cars)
+51 + 1
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

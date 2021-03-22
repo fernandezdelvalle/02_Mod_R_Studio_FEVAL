@@ -1,0 +1,157 @@
+---
+title: "R básico"
+output: html_notebook
+---
+
+## Explicaciones de crear chunks y ejecutar el código
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+print(pi, 10)
+```
+
+
+```{r}
+round(pi, 5)
+```
+
+
+```{r}
+floor(pi)
+```
+
+
+```{r}
+
+ceiling(pi)
+```
+
+
+
+***
+
+## Variables y funciones
+
+nombre_variables no utilizamos nombre de funciones reservadas 
+
+
+
+
+```{r}
+miVariable = 4
+doble = function(x){
+  2*x
+}
+# Para ejecutar en bloque MAY+CTRL+INTRO
+```
+
+
+```{r}
+# Para reutilizar la función
+doble(miVariable)
+```
+
+
+```{r}
+cuadrado = function(x){x^2}
+cuadrado(miVariable)
+```
+
+
+
+
+
+## Demostración de los chunks
+
+```{r message=TRUE, echo = TRUE, warning=FALSE}
+library(car)
+
+head(cars,3) # mostramos las tres primeras líneas
+```
+
+```
+
+
+
+## Estructura de datos
+
+```{r}
+primer_vector = c(1,2,3) # para declarar un vector
+```
+
+
+
+```{r}
+segundo_vector = scan() # para definir un vector de forma manual
+```
+
+
+
+```{r}
+fix(primer_vector) # cuando necesitamos modificar un vector x
+```
+
+
+
+```{r}
+rep("RStudio", 6)# dado un objeto a, define un vector constante n veces
+```
+
+
+
+### Progresiones y secuencias
+
+```{r}
+seq(a,b, by=d) # from...to, by = incremento
+```
+
+
+```{r}
+seq(a,b, length.out=n) # from ...to, progresión dada una longitud deseada n
+```
+
+
+```{r}
+seq(a:b) # secuencia from...to números enteros consecutivos
+```
+
+
+
+
+## Funciones
+
+
+```{r}
+sapply(primer_vector, FUN=doble) # es el equivalente de un ciclo FOR ... LOOP
+```
+
+
+```{r}
+# funciones nativas
+sqrt(primer_vector)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
