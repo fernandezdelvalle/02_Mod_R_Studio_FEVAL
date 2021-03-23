@@ -59,4 +59,88 @@ peliculas <- c("New Hope",
 ```
 
 
+```{r}
+# Creamos una nueva matriz
+
+taquillas2 <- c(474.5, 552.5, 310.7, 338.7, 380.3, 468.5)
+nombres2 <- c("The Phantom Menace", "Attack of the Clones", "Revenge of the Sith")
+
+```
+
+
+
+```{r}
+# combinación de matrices
+```
+
+
+
+```{r}
+# total de las taquillas de US y noUS
+```
+
+
+
+```{r}
+# Promedio no-US
+```
+
+
+```{r}
+# Promedio US
+```
+
+
+
+```{r}
+# Promedio de las 3 primeras peliculas US
+```
+
+
+
+```{r}
+# Buscamos el max de las taquillas de no-US
+```
+
+
+```{r}
+# Buscamos el promedio de no-US pero de forma alterna 
+```
+
+
+```{r}
+# Buscamos los resultados de la segunda fila, segunda columna
+```
+
+
+```{r}
+# Buscamos los resultados de la segunda columna
+```
+
+
+
+```{r}
+# Buscamos los resultados de la cuarta fila
+```
+
+
+```{r}
+# Buscamos el min de la quinta fila
+```
+
+
+```{r}
+# Desviación estandar de la segunda columna
+```
+
+
+
+
+
+
+
+
+
+
+
 
