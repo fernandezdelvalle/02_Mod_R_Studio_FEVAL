@@ -1,6 +1,6 @@
 ## Git attributes
 .gitattributes
-.gitignore
+# .gitignore
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
