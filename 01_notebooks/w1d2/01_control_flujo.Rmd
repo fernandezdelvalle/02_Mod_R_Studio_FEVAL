@@ -1,0 +1,243 @@
+---
+title: "Control de flujos"
+output: html_notebook
+---
+
+
+## Condicionales
+Los primeros controles de flujo en R son **if..else**
+
+
+'''
+if( condición) {
+  si la condición es TRUE o VERDADERA ejecuta alguna operación
+
+} else {
+
+  en caso contrario, FALSE o FALSO ejecuta otra operación o la que sería el resultado por defecto
+
+}
+
+'''
+
+Es importante entender que la condición **IF** valora la expresión, el resultado de este normalmente será TRUE O FALSE
+
+```{r}
+# Sentencias condicionales 1
+
+x <- 3
+if (x < 0) {
+  print("x es un número positivo")
+}
+
+```
+
+
+```{r}
+# sentencias condicionales 2
+y <- 6
+if (y < 0) {
+  sprintf("%d es un número negativo", y)
+  
+}else if (y == 0) {
+  sprintf("%d es cero", y)
+} else {
+  print("y es un número positivo o cero")
+}
+
+```
+
+
+```{r}
+# sentencias condicionales 3
+z <- 56
+ifelse(z > 0, "z es número positivo", "z es número negativo")
+```
+
+***
+
+
+## Vectores
+
+### 1.1 Jugamos al casino
+
+```{r}
+# creamos un vector de los días de la semana
+dias_semana <- c("Lunes", "Martes", "Miércoles", 
+                 "Jueves", "Viernes", "Sábado", "Domingo")
+vector_poker <- c(140, -50, -20, 20, 100, 200, -100)
+vector_ruleta <- c(100, 100, -400, 20, 10, 100, 200)
+
+# Como alternativa podemos utilizar la función scan() para crear vectores
+# vector_ruleta <- scan() # aquí añadimos en consola los valores PD Recordad de parar con doble intro
+print(vector_poker)
+print(vector_ruleta)
+```
+
+```{r}
+# Nombrado de las columnas o damos cuerpo al encabezado de las columnas
+names(vector_poker) <- dias_semana
+names(vector_ruleta) <- dias_semana
+```
+
+
+```{r}
+# observamos el resultado con los nombres de las columnas
+vector_poker
+```
+
+
+```{r}
+# Cálculamos las ganancias / pérdidas diarias
+total_diario <- vector_ruleta + vector_poker
+total_diario
+```
+
+## Otras operaciones y funciones básicas con los vectores
+
+```{r}
+length(vector_poker)
+```
+
+
+```{r}
+max(vector_ruleta)
+```
+
+
+```{r}
+# También podemos utilizar la función which()
+vector_ruleta[which(vector_ruleta > 50)] # la condición del which será TRUE, devolverá unos resultados
+```
+
+
+```{r}
+# which.max y which.min devuelve los índices respectivos de los vectores
+which.min(vector_poker)
+```
+
+
+```{r}
+# podemos ordenar los vectores con la función sort()
+sort(vector_poker) # ordenará de forma ASC de menor a mayor
+
+```
+
+```{r}
+sort(vector_poker, decreasing = TRUE) # ordenará de mayor a menor
+```
+
+
+```{r}
+# operaciones de estadísticos básicos
+mean(vector_poker)
+```
+
+
+
+```{r}
+median(vector_ruleta)
+```
+
+
+```{r}
+var(vector_poker)
+```
+
+
+```{r}
+cov(vector_ruleta, vector_poker)
+```
+
+
+```{r}
+corr(vector_poker, vector_ruleta)
+```
+
+
+```{r}
+sd(vector_ruleta)
+```
+
+
+```{r}
+# podemos utilizar table() para mostrar los valores absolutos
+table(vector_poker)
+```
+
+
+```{r}
+table(vector_poker) / length(vector_poker) # distribución de las frecuencias relativas
+```
+
+
+
+
+```{r}
+long_ruleta <- length(vector_ruleta)
+table(vector_ruleta) / long_ruleta # no aplicamos esta tipo de operación
+```
+
+
+```{r}
+table(vector_ruleta) / 7 # no aplicamos esta tipo de operación
+```
+
+
+## 1.3 Ciclo FOR aplicado a los vectores
+
+```{r}
+suma <- 0
+for (i in vector_poker) {
+  suma <- suma + 1 # suma los índices
+}
+suma
+```
+
+```{r}
+suma <- 0
+for (i in vector_poker) {
+  suma <- suma + i # suma los valores
+}
+suma
+```
+
+
+```{r}
+num <-  NULL # inicializamos el vector con Null o vector vacío
+for (i in 1:100) {
+  num <- c(num, i)
+}
+num
+
+```
+
+
+
+```{r}
+# alternativa del método de asignación
+num <- 0
+for (i in 1:100){
+  num[i] <- i
+}
+
+num
+```
+
+
+```{r}
+# podemos crear vectores
+seq(1,100) # genera secuencia de 100 valores (start 1 - stop 100, step 1)
+```
+
+
+```{r}
+seq(1, 100, by=5) # start 1, stop 100 y paso 5
+```
+
+
+
+
+
+
+

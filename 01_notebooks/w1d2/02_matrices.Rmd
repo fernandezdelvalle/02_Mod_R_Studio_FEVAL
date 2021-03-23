@@ -1,0 +1,116 @@
+---
+title: "Matrices"
+output: html_notebook
+---
+
+## Matrices en R
+
+```{r}
+# matrix() nrow, ncol por filas
+A <- matrix(c(1, 4, 6, 8, -1, -4, 0 , 6, 0),
+            nrow = 3,
+            ncol = 3,
+            byrow = F) # por defecto es FALSE
+A
+```
+
+```{r}
+# matrix() nrow, ncol por columnas
+A <- matrix(c(1, 4, 6, 8, -1, -4, 0 , 6, 0),
+            nrow = 3,
+            ncol = 3,
+            byrow = T) # forzamos el parámetro byrow en TRUEo T
+A
+```
+
+```{r}
+# añadimos filas y columnas con las fucniones rbind() y cbind()
+matriz_2 <- cbind(A, c(-3, 5, 9)) # añadimos una columna a la matriz A
+matriz_2
+```
+
+
+```{r}
+matriz_3 <- rbind(A, c(5, 16, -5)) # añadimos una fila a la matriz A
+matriz_3
+```
+
+
+
+```{r}
+# probamos añadiendo filas con dos valores solamente
+matriz_2 <- rbind(A, c(12, NULL, 10)) # El valor será reemplazado por el valor sucesivo
+matriz_2
+```
+
+
+```{r}
+# Referenciamos los valores en la matriz
+print(matriz_2)
+matriz_2[1,3] # extraerá los valores row, col 
+```
+
+
+```{r}
+matriz_2[3, ] # extrae los valores de la tercera fila
+```
+
+
+```{r}
+matriz_2[ ,2] # extrae los valores de la segunda columna
+```
+
+
+```{r}
+matriz_3
+matriz_3[1:2, ] # extrae los valores de 2 filas y todas las columnas
+```
+
+
+```{r}
+matriz_3[2, 2:3] # extrae los valores de la segunda fila y columna 2,3
+```
+
+## 2.1 Operaciones con matrices
+
+```{r}
+dim(matriz_2) # dimensión de la matriz
+```
+
+
+```{r}
+dim(matriz_3)
+dim(matriz_3)[1] # recogemos solo el resultado del número de filas del output de dim()
+```
+
+
+```{r}
+dim(matriz_3)[2] # recogemos solo el resultado del número de columnas
+```
+
+
+```{r}
+diag(matriz_3) # extrae los elementos de la diagonal
+```
+
+
+```{r}
+t(matriz_3) # transposición de una matriz
+```
+
+
+```{r}
+matriz_2 * matriz_3 
+```
+
+
+```{r}
+matriz_2%*%matriz_2 # producto escalado
+```
+
+
+
+
+
+
+

@@ -1,0 +1,111 @@
+---
+title: "Funciones y Factores"
+output: html_notebook
+---
+
+## Declaramos las funciones
+
+```{r}
+cuadrado <- function(x) {
+  x^2
+}
+
+cuadrado(vector_ruleta)
+```
+
+```{r}
+# alternativa con sapply
+
+sapply(vector_ruleta, FUN = cuadrado)
+```
+
+
+## Factores
+
+
+```{r}
+student <- c(1, 3, 4, 5, 7, 8, 10)
+fac_1 <- factor(student,
+              labels = c("Sup", "Sup", "Sup", "Apro", "Nota", "Exc", "MH"))
+fac_1
+```
+
+
+```{r}
+student_2 <- c(4, 5, 7, 8, 10, 1, 3)
+fac_2 <- factor(student_2,
+              levels = c(1, 3, 4, 5, 7, 8, 10),
+              labels = c("Sup", "Sup", "Sup", "Apro", "Nota", "Exc", "MH"))
+fac_2
+```
+
+
+
+
+```{r}
+genero <- c("Masc", "Masc", "Fem", "Masc", "Fem")
+factor_genero <- factor(genero)
+factor_genero
+```
+
+```{r}
+desempenyo_laboral <- c("Alto", "Bajo", "Medio", "Alto", "Bajo", "Medio", "Alto", "Alto", "Bajo")
+factor_des_1 <- factor(desempenyo_laboral,
+                     levels = c("Bajo", "Medio", "Alto"),
+                     ordered = TRUE)
+factor_des_1
+```
+
+En caso contrario sin indicadr los niveles
+
+```{r}
+desempenyo_laboral <- c("Alto", "Bajo", "Medio", "Alto", "Bajo", "Medio", "Alto", "Alto", "Bajo")
+factor_des_2 <- factor(desempenyo_laboral)
+factor_des_2
+```
+
+
+```{r}
+factor_des_1[1] # podemos extraer el primer valor o resultado de nuestro factor
+factor_des_1[2]
+factor_des_1[3]
+```
+
+
+
+```{r}
+factor_des_1[1] > factor_des_1[3] # evalua Alto > Bajo
+```
+
+
+```{r}
+# para analizar los niveles
+levels(factor_des_1)
+```
+
+```{r}
+is.ordered(factor_des_1) # devuelve la ordenación del factor
+```
+
+
+
+```{r}
+is.ordered(factor_genero) # devuelve FALSE porque no tenemos levels declarados
+```
+
+```{r}
+is.factor(factor_genero) # evalua si el objeto es un factor o no
+```
+
+
+```{r}
+# también podemos transformar en factores
+fac_3 <- as.factor(factor_des_1) # realizará una conversión a factor
+fac_3
+```
+
+
+
+
+
+

@@ -1,0 +1,62 @@
+---
+title: "pra_matrices"
+output: html_notebook
+---
+
+## Prácticas con las matrices
+
+#### Descripción
+
+```
+'''
+# Taquilla de Star Wars: En Millones de dólares (USD)!
+# Primer elemento taquilla en EEUU, segundo taquilla fuera de EEUU.
+new_hope <- c(460.998, 314.400)
+empire_strikes <- c(290.475, 247.900)
+return_jedi <- c(309.306, 165.800)
+'''
+```
+
+```{r}
+# Crear una matriz
+```
+
+
+
+
+```{r}
+# Como evaluamos una matriz
+is.matrix()
+```
+
+
+```{r}
+typeof()
+```
+
+
+```{r}
+# Creamos el encabezado, creamos primero los vectores
+peliculas <- c("New Hope",
+               "Empire Strikes",
+               "Return Jedi")
+
+# Para los paises EEUU y no-EEUU
+
+```
+
+
+
+```{r}
+# Sumamos las taquillas por fila
+
+```
+
+
+
+```{r}
+# suma de las taquillas globales
+```
+
+
+
