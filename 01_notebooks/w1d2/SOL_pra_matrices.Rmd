@@ -1,0 +1,242 @@
+---
+title: "pra_matrices"
+output: html_notebook
+---
+
+## Prácticas con las matrices
+
+#### Descripción
+
+```
+'''
+# Taquilla de Star Wars: En Millones de dólares (USD)!
+# Primer elemento taquilla en EEUU, segundo taquilla fuera de EEUU.
+new_hope <- c(460.998, 314.400)
+empire_strikes <- c(290.475, 247.900)
+return_jedi <- c(309.306, 165.800)
+'''
+```
+
+```{r}
+# Taquilla de Star Wars: En Millones de dólares (USD)!
+# Primer elemento taquilla en EEUU, segundo taquilla fuera de EEUU.
+new_hope <- c(460.998, 314.400)
+empire_strikes <- c(290.475, 247.900)
+return_jedi <- c(309.306, 165.800)
+
+# Crear una matriz
+star_wars_matriz <- matrix(
+  c(new_hope, empire_strikes, return_jedi),
+  byrow = TRUE,
+  nrow = 3
+)
+
+star_wars_matriz
+```
+
+
+
+
+```{r}
+# Como evaluamos una matriz
+is.matrix(star_wars_matriz)
+```
+
+
+```{r}
+typeof(star_wars_matriz)
+```
+
+
+```{r}
+# Creamos el encabezado, creamos primero los vectores
+peliculas <- c("New Hope",
+               "Empire Strikes",
+               "Return Jedi")
+
+# Para los paises EEUU y no-EEUU
+country <- c("USA",
+             "no-USA") # declaramos un vector o array
+
+# Asignamos a las filas el vector pelicula y las columnas el vector country
+
+rownames(star_wars_matriz) <- peliculas
+colnames(star_wars_matriz) <- country
+
+star_wars_matriz
+
+```
+
+
+
+```{r}
+# Sumamos las taquillas por fila
+vec_suma_fila <-  rowSums(star_wars_matriz) # suma por fila
+vec_suma_fila
+
+
+# sumamos por columna sería colSums(
+vec_suma_columna <- colSums(star_wars_matriz)
+vec_suma_columna
+```
+
+
+
+```{r}
+# suma de las taquillas globales
+taquilla_global <- colSums(
+  star_wars_matriz
+)
+taquilla_global[1]
+```
+
+
+```{r}
+taquilla_global[2]
+```
+
+
+```{r}
+taquilla_global[1] + taquilla_global[2] # suma de las dos
+```
+
+
+
+```{r}
+# Creamos una nueva matriz
+
+taquillas2 <- c(474.5, 552.5, 310.7, 338.7, 380.3, 468.5)
+nombres2 <- c("The Phantom Menace", "Attack of the Clones", "Revenge of the Sith")
+
+# creamos la matriz
+star_wars_matriz_2 <- matrix(
+  taquillas2,
+  nrow = 3,
+  byrow = TRUE,
+  dimnames = list(
+    nombres2,
+  country) # country es igual a c("US", "no-US")
+)
+star_wars_matriz_2
+
+```
+
+
+
+```{r}
+# combinación de matrices por fila
+todo_star_wars <- rbind(star_wars_matriz,
+                        star_wars_matriz_2) # realizamos un append por fila de las dos matrices
+todo_star_wars
+```
+
+
+En caso de tener los resultados por columnas
+
+```{r}
+transp_mat_1 <- t(star_wars_matriz) # en caso lo tenemos por columna realizamos un merge / concat
+transp_mat_1
+```
+
+```{r}
+transp_mat_2 <- t(star_wars_matriz_2)
+transp_mat_2
+```
+
+
+```{r}
+# combinación de matrices por columna
+todo_star_wars_2 <- cbind(transp_mat_1,
+                        transp_mat_2) # realizamos un append por fila de las dos matrices
+todo_star_wars_2
+```
+
+***
+
+
+```{r}
+# total de las taquillas de US y noUS
+total_taquillas_region <- colSums(todo_star_wars)
+total_taquillas_region
+```
+
+
+
+```{r}
+# Promedio no-US
+promedio_noUS <- mean(todo_star_wars[,2])
+promedio_noUS
+```
+
+
+```{r}
+# Promedio US
+promedio_US <- mean(todo_star_wars[,1])
+promedio_US
+```
+
+
+
+```{r}
+# Promedio de las 3 primeras peliculas US
+promedio_3_US <- mean(todo_star_wars[1:3,1])
+promedio_3_US
+```
+
+
+
+```{r}
+# Buscamos el max de las taquillas de no-US
+max_taquillas_noUS <- max(todo_star_wars[,2])
+max_taquillas_noUS
+```
+
+
+```{r}
+# Buscamos el promedio de no-US pero de forma alterna
+promedio_alterno_noUS <- mean(todo_star_wars[c(1,3,5),2]) # recordad que el índice y posición en R empieza por 1
+promedio_alterno_noUS
+```
+
+
+```{r}
+# Buscamos los resultados de la segunda fila, segunda columna
+todo_star_wars[2,2]
+```
+
+
+```{r}
+# Buscamos los resultados de la segunda columna
+todo_star_wars[,2]
+```
+
+
+
+```{r}
+# Buscamos los resultados de la cuarta fila
+todo_star_wars[4,]
+```
+
+
+```{r}
+# Buscamos el min de la quinta fila
+min(todo_star_wars[5,])
+```
+
+
+```{r}
+# Desviación estandar de la segunda columna
+sd(todo_star_wars[,2])
+```
+
+
+
+
+
+
+
+
+
+
+
+
