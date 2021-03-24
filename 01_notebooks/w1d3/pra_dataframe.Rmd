@@ -1,0 +1,276 @@
+---
+title: "PRA Dataframe"
+author: "Marco Russo"
+date: "24-03-2021"
+output:
+  html_document:
+    highlight: monochrome
+    number_sections: yes
+    theme: cosmo
+    toc: yes
+  pdf_document:
+    toc: yes
+---
+
+## Dataset Titanic
+
+Este dataset es uno de los más utilizado en Machine Leaning y en Análisis de datos para preparación de datos, manipulación, limpieza y modelos. Además de tener unos cuantos atributos a visualizar.
+
+
+```{r}
+# Cargamos el dataset
+url <- "https://raw.githubusercontent.com/marcusRB/02_Mod_R_Studio_FEVAL/main/99_data/titanic.csv"
+df_titanic <- read.csv(file = url, stringsAsFactors = F)
+
+# mostramos los resultados
+head(df_titanic)
+tail(df_titanic)
+```
+
+
+
+```{r}
+dim(df_titanic) # observamos las dimensiones del dataset
+```
+
+Tenemos `891` observaciones y `12` atributos
+
+
+```{r}
+# check del tipo de valores
+typeof(df_titanic)
+
+# evaluar si es un dataframe
+is.data.frame(df_titanic)
+
+
+# extraemos la estructura del dataset
+str(df_titanic)
+
+```
+
+## Fase de preparación del dataset
+
+```{r}
+# realizamos el check de los valores vacios
+is.na(df_titanic$Pclass[1:10])
+
+# colSums con is.na()
+colSums(is.na(df_titanic)) # realiza la sumatoria de los valores na de cada atributo
+
+# Realizamos una comprobación de los valores numéricos
+summary(df_titanic)
+```
+
+
+```{r}
+# Creamos una tabla de frecuencias: absoluta
+table(df_titanic$Age) # var numér
+
+table(df_titanic$Embarked) # var. cat.
+
+table(df_titanic$Pclass)
+```
+
+
+```{r}
+# sumamos los valores que son vacios
+colSums(df_titanic == "") # realizamos el check solo de los valores VACÍOS
+
+colSums(df_titanic == "", na.rm = T) # también podemos realizar la misma operación eliminando los NA's
+```
+
+> NOTA: Observamos que disponemos de un dataset de 12 atributos y 891 observaciones. De las cuáles tenemos:
+- 177 Na's en Age
+- 687 vacios en Cabin
+- 2 vacios en Embarked
+
+
+```{r}
+# los valores representados en una tabla de frecuencia relativa
+prop.table(table(df_titanic$Embarked)) # prop.table() me permite visualizar la tabla con valores relativos
+
+# con la opción round() realizamos el redondeo de estos valores
+round(prop.table(table(df_titanic$Embarked)), 3) # y dejamos solo 3 decimales
+```
+
+
+## Imputamos los valores vacíos, nulos
+
+Estas técnicas de imputación me permite realizar operaciones de reemplazar los valores faltantes con valores cercanos, promedio, regresión...siempre y cuando estos superan un min. ~70% ?¿
+
+- NO HACER NADA
+- Eliminar los valores nulos o vacíos (filas o columnas por el total)
+- Eliminar los valores nulos o vacíos (filas o columnas por un umbral mínimo, ej 70%)
+- reemplazamos por valores frecuentes o la moda
+- aplicamos valores cercanos (clustering, segmentación)
+- `BACKFILL` o `FORFILL` (valores que se encuentran a la observación atrás o delante)
+- mean, mediana, quantil (por el total del atributo)
+- o los anteriores respecto a su cluster (por n variables o patrones cercanos)
+- regresión lineal o logística
+- hay otros métodos (redes neuronales, métodos estadísticos basado en distancias, etc)
+...
+
+***
+
+```{r}
+# Realizamos antes de reemplazar valores una copia de backup
+df_bak <- df_titanic
+```
+
+
+
+```{r}
+# imputamos las observaciones de Embarked con el valor frecuente S
+df_titanic$Embarked[df_titanic$Embarked == ""] = "S"
+
+# comprobamos los resultados
+round(prop.table(table(df_titanic$Embarked)), 3)
+```
+
+
+
+### Imputamos los valores vacíos de `Cabin`
+
+```{r}
+prop.table(table(df_titanic$Cabin))[1] # observamos solo el primer elemento
+```
+
+
+Podemos observar que los valores vacíos de `Cabin` superan este umbral mínimo fijado al principio del ~70%. Por lo que no vamos a realizar ninguna imputación.
+
+
+### Imputación de los valores de `Age`
+
+```{r}
+# Imputamos por el mean
+# attach(df_titanic)
+mean(df_titanic$Age) # si el resultado es NA, debemos eliminar temporalmente los NA's
+
+# Forzamos con el parámetro na.rm
+mean(df_titanic$Age, na.rm = T)
+
+
+# redondeo al "suelo"
+floor(mean(df_titanic$Age, na.rm = T))
+
+# redondeo al "techo"
+ceiling(mean(df_titanic$Age, na.rm = T))
+
+media_Age <- ceiling(mean(df_titanic$Age, na.rm = T)) # guardamos la variable Media
+media_Age
+
+# check de la variable Age
+summary(df_titanic$Age)
+
+
+# visualizamos Age
+hist(df_titanic$Age)
+#detach(df_titanic)
+```
+
+
+```{r}
+# operación de imputación
+df_titanic$Age[df_titanic$Age == "NA"] = media_Age # ¿funcionará?
+
+# comprobamos
+summary(df_titanic$Age)
+
+```
+
+No puedo realizar la misma operación que aplicamos por el `valor frecuente` de **Embarked** porque el valor *NA* no es una cadena de texto.
+
+```{r}
+# La forma correcta de imputación
+df_titanic$Age[is.na(df_titanic$Age)] = media_Age
+
+summary(df_titanic$Age)
+
+# observamos los resultados
+hist(df_titanic$Age)
+
+```
+
+> Nota: Aún parece ser la solución rápida, no es del todo eficiente. Es preferible realizar el promedio por cluster o segmentación de atributos o bien por valor cercano.
+
+
+### Discretización de los atributos
+
+```{r}
+# observamos los valores únicos de los atributos
+attach(df_titanic)
+
+apply(df_titanic, MARGIN = 2, FUN = function(i) length (unique(i)))
+
+```
+
+```{r}
+# Realizamos la transformación a factores de los atributos de forma manual
+
+#Survived <- as.factor(Survived)
+#Pclass <- as.factor(Pclass)
+#Sex <- as.factor(Sex)
+#Embarked <- as.factor(Embarked)
+```
+
+
+#### Alternativa con la condición FOR
+
+```{r}
+cols <- c("Survived", "Pclass", 
+          "Sex", "Embarked")
+for (i in cols){
+  df_titanic[,i] = as.factor(df_titanic[,i])
+}
+detach(df_titanic)
+str(df_titanic)
+```
+
+## Procesos de análisis del conjunto de datos
+
+Procedemos con la representación gráfica de los atributos discretizados anteriormente
+
+```{r}
+# visualizamos la relación de las vars "Sex" y "Survived"
+dim(df_titanic)[1]
+
+# guardamos el valor de las filas
+filas <- dim(df_titanic)[1]
+
+# visualizamos con la discretización del género según variable dependiente o var target `Survived`
+ggplot(data= df_titanic[1:filas,], 
+       aes(
+         x = Sex,
+         fill = Survived
+       )
+    ) + geom_bar()
+```
+
+
+### Sin discretizar las variables
+
+
+```{r}
+# visualizamos la relación de las vars "Sex" y "Survived"
+dim(df_bak)[1]
+
+# guardamos el valor de las filas
+filas <- dim(df_bak)[1]
+
+# visualizamos con la discretización del género según variable dependiente o var target `Survived`
+ggplot(data= df_bak[1:filas,], 
+       aes(
+         x = Sex,
+         fill = Survived
+       )
+    ) + geom_bar()
+
+```
+
+
+
+
+
+
+
