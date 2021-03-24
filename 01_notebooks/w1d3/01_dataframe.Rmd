@@ -273,6 +273,13 @@ hist(df_bulls$SalePrice,
 
 
 
+```{r}
+# realizar evaluaciones de null, valores NaN o na
+is.na(df_bulls)
+is.null(df_bulls)
+is.nan(df_bulls)
+```
+
 
 
 
