@@ -1,0 +1,282 @@
+---
+title: "Dataframe"
+author: "Marco Russo"
+date: "24-03-2021"
+output:
+  html_document:
+    highlight: monochrome
+    number_sections: yes
+    theme: cosmo
+    toc: yes
+  pdf_document:
+    toc: yes
+---
+
+# Dataframe
+
+Tienen formato tabular, incluye vectores de diferentes tipo de datos: string, numeric, boolean, date, datetime
+y siempre podemos crear un dataframe desde cero, comenzando con unos vectores:
+
+```{r}
+# creamos tres vectores
+edad <- scan()
+genero <- scan(what = "character")
+
+# status declaramos 0 = sano 1 = enfermo
+status <- scan()
+```
+
+
+```{r}
+# creamos el dataframe
+df_hospital <- data.frame(
+  edad,
+  genero,
+  status,
+  stringsAsFactors = TRUE # por default
+)
+
+df_hospital
+```
+
+De preferencia es preferible configurar `stringAsFactor` como False para que sucesivamente realizamos nuestras transformaciones a factores.
+
+
+```{r}
+# probamos a realizar lo mismo con el parámetro en FALSE
+df_prueba <- data.frame(
+  edad,
+  genero,
+  status,
+  stringsAsFactors = FALSE
+)
+df_prueba
+```
+
+
+
+
+```{r}
+dim(df_hospital) # mostramos las dimensiones del dataframe (filas x cols)
+```
+
+
+```{r}
+# si necesito manipular de las columnas utilizamos el dolar $
+df_hospital$genero
+is.factor(df_hospital$genero)
+```
+
+Para evitar de llamar por `$` los atributos, utilizamos la función **attach()** para fijar nuestro df
+
+```{r}
+attach(df_hospital)
+genero # muy útil a la hora de mostrar los datos o manipularlos, o en la visualización de los datos
+is.factor(genero) # hay que tener cuidado con el uso de condicionales o evaluar estos atributos
+detach(df_hospital) # volver al estado original
+```
+
+
+***
+
+```{r}
+# Cuando deseamos convertir un atributo a factor
+as.factor(df_prueba$genero) # todas operaciones siempre se realizan al vuelo nunca por escrito! 
+df_prueba$genero # efectivamente comprobaremos que el atributo no ha sido transformado en factor
+levels(df_prueba$genero)
+
+# siempre debemos escribir al propio dataframe
+df_prueba$genero <- as.factor(df_prueba$genero)
+df_prueba$genero
+levels(df_prueba$genero)
+
+```
+
+
+***
+
+Si necesitamos añadir nuevos campos, seguiremos utilizando `rbind()` y en caso de nuevas columnas `cbind()`
+
+```{r}
+# creamos una nueva observación
+obs_a <- c(55, "m", 0)
+df_hospital <- rbind(df_hospital, obs_a)
+
+# mostramos los resultados
+df_hospital
+```
+
+
+Si deseamos observar los primeros valores utilizamos la función `head` y los últimos con `tail`
+
+```{r}
+# mostramos las funciones head y tail 
+head(df_hospital) # por defecto son 6
+head(df_hospital, n=10) # por defecto son 6 primeros resultados
+```
+
+
+```{r}
+tail(df_hospital)
+tail(df_hospital, n=7) # por defecto son 6
+```
+
+
+```{r}
+# Probamos en crear una nueva observación
+obs_B <- c(18, "f", 1)
+df_hospital <- rbind(df_hospital, obs_B)
+df_hospital
+```
+
+
+```{r}
+# si necesitamos eliminar una observación
+rm(obs_B) # solo eliminar el vector
+
+df_hospital
+```
+
+
+## Operaciones con Dataframes
+
+```{r}
+# realizamos slice:dice sobre el dataframe o subset al vuelo
+df_hospital[, c(1,3)] # selección 1 y 3 col
+
+# otra opción sería realizar la manipulación en una variable para que podamos manipularla más adelante
+datos_sub1 <- df_hospital[, c(1,2)] # selección 1 y 2 col
+datos_sub1
+```
+
+
+```{r}
+is.data.frame(datos_sub1)
+```
+
+
+```{r}
+# selección multiple filas y cols
+datos_sub2 <- df_hospital[3:6, 1:2] # selección de 3 a 6 fila, y 1,2 col
+datos_sub2
+```
+
+```{r}
+# pero también podemos realizar llamando filas y col a través de vectores
+datos_sub3 <- df_hospital[c(5,8,10,15,20), c(1,3)]
+datos_sub3
+```
+
+
+## Mostramos un subset con una condición
+
+```{r}
+# Cuando necesitamos filtrar y realizar operaciones con determinadas condiciones
+df_hospital[df_hospital$genero == 'm', 1:3] # las filas será evaluadas por una condición, mostrará col 1 a 3 si esta será TRUE
+```
+
+
+```{r}
+# también existe la alternativa con la función subset
+subset(df_hospital, df_hospital$genero == 'f') # operación al vuelo
+datos_sub4 <- subset(df_hospital, df_hospital$genero == 'f', c(1,3)) # mostramos la condición TRUE, y col 1, 3
+datos_sub4
+```
+
+> **Nota**: 
+*Hemos observado que el género M se comporta..... y el género F bla bla*
+
+
+### Doble condición
+
+mostramos solo el género 'm' y 'enfermos' con todas las columnas
+
+```{r}
+# Podemos realizar subset con más de una condición
+df_hospital[df_hospital$genero == 'm' & df_hospital$status == 1, ] 
+```
+
+
+## Más datasets
+
+### Cargamos los datasets directamente desde **R Studio**
+
+```{r}
+# creamos un dataset con vectores o utilizamos dataset precargados
+#install.packages(datasets)
+library(datasets)
+
+# checkear los datasets
+help(datasets)
+df_mtcars <- datasets::mtcars
+```
+
+
+
+```{r}
+# visualizamos los 6 primeros resultados y los últimos
+head(df_mtcars)
+```
+
+
+```{r}
+tail(df_mtcars)
+```
+
+
+### Cargamos datos
+
+Cargamos datos desde la nube
+
+
+
+
+```{r}
+url = 'https://raw.githubusercontent.com/joanby/r-basic/master/data/bulls.dat'
+df_bulls <- read.table(file = url)
+df_bulls
+```
+
+
+```{r}
+# realizamos la construcción del dataframe con el encabezado
+nombre_columnas <- c("breed", "SalePrice", "shoulder", "fat_free",
+                     "percent_ff", "frame_scale", "back_fat", "sale_height",
+                     "sale_weight")
+df_bulls <- read.table(file = url, header = FALSE, col.names = nombre_columnas,
+                       sep = "", dec = ".") # muchos de los parámetros son por defecto!!! check con el help
+df_bulls
+```
+
+
+```{r}
+summary(df_bulls) # mostrará los estadísticos básico de los atributos
+```
+
+
+### Visualización
+
+```{r}
+# representación gráfica de SalePrice
+hist(df_bulls$SalePrice) # gráfico muy básico y con valores por defecto
+```
+
+
+
+```{r}
+# personalizamos los ejes, títulos
+hist(df_bulls$SalePrice,
+     main = "Frecuencia absoluta de los precios de venta de los toros del año 2000",
+     xlab = "precio de venta",
+     ylab = "frecuencia abs")
+```
+
+
+
+
+
+
+
+
+
+
