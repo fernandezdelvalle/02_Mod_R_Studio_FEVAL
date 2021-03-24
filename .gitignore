@@ -358,9 +358,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-.Rproj.user
-.RData
-.Rhistory
+*.Rproj.user
+*.RData
+*.Rhistory
 *.Rproj
 
 # Spyder project settings
