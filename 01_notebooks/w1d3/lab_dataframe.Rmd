@@ -269,6 +269,102 @@ ggplot(data= df_bak[1:filas,],
 ```
 
 
+Seguimos con un análisis de datos y visualización
+
+```{r}
+# Visualizamos sin discretizar
+ggplot(data=df_bak[1:filas,],
+       aes(
+         x = Sex,
+         fill = Survived
+         )
+       ) + geom_bar()
+
+
+# Visualizamos
+ggplot(data=df_titanic[1:filas,],
+       aes(
+         x = Sex,
+         fill = Pclass
+         )
+       ) + geom_bar()
+```
+
+
+
+```{r}
+# visualizamos la frecuencia de Survived y Embarked sin la discretización
+ggplot(
+  data = df_bak[1:filas, ],
+  aes(
+    x = Embarked,
+    fill = Survived
+  )
+) + geom_bar(position = "fill")+ylab("Frecuencia")
+```
+
+
+
+
+```{r}
+# visualizamos la frecuencia de Survived y Embarked con la discretización
+ggplot(
+  data = df_titanic[1:filas, ],
+  aes(
+    x = Embarked,
+    fill = Survived
+  )
+) + geom_bar(position = "fill")+ylab("Frecuencia")
+```
+
+
+```{r}
+# Creamos un gráfico combinado con frecuencias relativas
+t <- table(df_titanic[1:filas, ]$Embarked,
+           df_titanic[1:filas, ]$Survived)
+
+t # devuelve una tabla con valores absolutos
+```
+
+
+```{r}
+dim(t)
+for (i in 1:dim(t)[1]){
+  t[i,] <- t[i,] / sum(t[i, ]) * 100
+}
+t
+```
+
+
+```{r}
+ggplot(data = df_titanic[1:filas,],
+       aes(x = Embarked,
+           fill=Survived)
+       ) + geom_bar(position='fill') + ylab("Frecuencia")+facet_wrap(~Sex)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
