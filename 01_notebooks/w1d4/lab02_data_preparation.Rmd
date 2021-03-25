@@ -119,6 +119,8 @@ nba_bak <- nba
 
 
 *creamos una lista conf*
+
+
 ```{r}
 #nba$Conference<-(nba$Conference)
 ```
