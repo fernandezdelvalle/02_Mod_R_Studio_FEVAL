@@ -1,0 +1,517 @@
+---
+title: "Lab02 - Lectura y preparación de datos para Data Mining"
+author: "nombre_apellidos_estudiante"
+date: sys.date
+output: 
+  html_document: 
+    highlight: tango
+    theme: spacelab
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# NBA player of the week
+
+
+# Descripción y enunciado
+El objetivo de esta actividad es la gestión y preparación de datos. La gestión de datos es una parte muy importante de cualquier proceso de minería de datos, ya que los datos se deben preparar y preprocesar antes de iniciar el proceso de extracción de conocimiento.
+Esta tarea ilustra algunos de los procedimientos básicos con los que nos podemos encontrar para preparar los datos: **analizar los tipos de datos, tranformar valores, detectar e eliminar outliers, hacer un muestreo, etcétera**.
+
+# Fichero de datos
+El conjunto de datos con el que trabajaremos en esta actividad surge de la bases de datos disponibles en Kaggle . En concreto, los datos corresponden a los jugadores nombrados jugadores de la semana desde la temporada 1984-1985 hasta la temporada 2017-2018. Estos datos nos ofrecen múltiples posibilidades para consolidar los conocimientos y competencias de manipulación de datos, preprocesado y análisis descriptivo. El fichero `NBA_player_of_the_week.csv` se encuentra adjunto.
+
+
+# Ingesta de datos
+Actualmente el fichero se encuentra en la misma carpeta de datos RMD, está en adjunto. Se enviará nueva práctica similar con los datos de ingesta a través de scraping / API / base de datos para R y Python.
+
+
+# Valoraciones
+- se valorarán los trabajos por los detalles, no vale con el solo enviar un trozo de código, sino la explicación es fundamental
+- explicar además los resumen de cada sección (carga, preparación, EDA, limpieza, nuevos atributos, discretización, split train-test)
+- conclusiones y comparativas son los más importantes para comenzar con Data Mining.
+
+**Workflow:**
+1 Cargar un juego de datos
+1.1 Leer el fichero de datos “housePrices.txt”
+2 Consulta de los datos cargados
+2.1 Consulta de las etiquetas de los datos
+2.2 Consulta de datos
+3 Preparación de los datos
+3.1 Cambiamos los identificadores de filas y columnas
+3.2 Filtramos los datos
+3.3 Modificamos el contenido de los datos
+4 Split Train-Test
+4.1 Generamos dos conjuntos de datos train y test
+4.2 Guardamos los ficheros train y test en formato .csv
+
+Para resolver la actividad, deberéis usar algunos comandos de R que quizás no os resulten demasiado familiares y que recomendamos que investiguéis. Estos son:
+  
+* levels
+* summary
+* order/sort
+* trimws
+* sub
+* table
+* ifelse
+
+
+## 1 Cargar un juego de datos
+*Leer el fichero de datos “NBA_player_of_the_week.csv” y guardar los datos en un objeto con identificador denominado nba.*
+
+```{r}
+nba<-read.csv("../../02_PROGRAMA_R_STUDIO/99_data/NBA_player_of_the_week.csv",header = TRUE)
+nba
+```
+
+
+## 2 Descripción de los datos
+*Describir brevemente la estructura de los datos: qué tipo de datos contiene, número de filas y columnas y nombre de las columnas. Realizar un resumen descriptivo de los datos.*
+
+### tipo de dato con class()
+```{r}
+class(nba)
+```
+
+### tipo de estructura
+```{r}
+str(nba)
+```
+
+### head() es resumen de los 6 primeros resultados
+```{r}
+head(nba)
+```
+
+
+### con ls() extraemos el listado de las variables (columnas)
+```{r}
+ls(nba)
+```
+
+
+### usando names() también extraemos las etiquetas de las columnas
+```{r}
+names(nba)
+```
+
+
+### extraemos las etiquetas de las filas con row.names() o rownames()
+```{r}
+row.names(nba)
+```
+
+# 3.Preparación de la base de datos
+## 3.1 Asignar NA a los valores ausentes en los datos de `Conference`.
+
+```{r}
+levels(nba$Conference)
+```
+
+
+```{r}
+# Realizamos una copia de backup
+nba_bak <- nba
+```
+
+
+
+*creamos una lista conf*
+```{r}
+#nba$Conference<-(nba$Conference)
+```
+
+```{r}
+conf
+```
+
+*Asignar NA a los valores ausentes en los datos de `Conference`.*
+```{r}
+nba$Conference[nba$Conference == ""] <- NA
+levels(nba$Conference)
+```
+
+
+*comprobaremos los nuevos datos asignados*
+```{r}
+str(nba$Conference)
+summary(nba$Conference)
+```
+
+
+## 3.2 Transformar los datos de Conference en variable categórica y mostrar la tabla de frecuencia.
+```{r}
+conference <- (nba$Conference)
+summary(conference)
+```
+
+
+## 3.3 Comprobar que la variable tiene xxx valores ausentes
+```{r}
+summary(is.na(conference == TRUE))
+```
+ 
+## 3.4 Transformar las variables Height, Player, Position, Season, Team y Weight en variables categóricas.
+```{r}
+# creamos la variable height
+height <- (nba$Height)
+
+# creamos la variable player
+player <- (nba$Player)
+
+# creamos la variable pos
+pos <- (nba$Position)
+
+# creamos la variable season
+season <- (nba$Season)
+
+# creamos la variable team
+team <- (nba$Team)
+
+#creamos la variable weight
+weight <- (nba$Weight)
+
+```
+
+## 3.5 Comprobar que estas variables no tienen valores perdidos.
+```{r}
+table(height[height == "" || NA]) # me devolverá una tabla con los valores ceros si no encuentra vacios o NA
+
+summary(height[height == "" || NA]) # me devolverá una tabla con los valores ceros si no encuentra vacios y una del total de NA's
+
+
+player[player == ""]
+pos[pos == ""]
+season[season == ""]
+team[team == ""]
+weight[weight == ""]
+
+table(c(height,player,pos,season,team,weight) != "")
+
+summary(c(height,player,pos,season,team,weight) != "") 
+
+
+table(ifelse(c(height,player,pos,season,team,weight) != "","Bien! no hay campos vacios","Hay valores vacios"))
+```
+
+## 3.6 Calcular el número de anyos que pasan entre que salio el jugador elegido en el draft y la temporada en la que fue jugador de la semana. Denomina la variable tiempo.
+```{r}
+draftYear <- (nba$Draft.Year)
+head(draftYear)
+
+shortSeason <-(nba$Season.short)
+head(shortSeason)
+
+
+
+# creamos un df con los valores player, draftYear, shortSeason y Season
+draftPlayer <- data.frame(player,pos,draftYear,shortSeason, season, conference)
+#comprobamos la estructura
+head(draftPlayer)
+```
+```{r}
+# creamos la variable calcYears como la diferencia entre el año de la shortSeason y draftYear
+calcYears <- (shortSeason - draftYear)
+
+# anadimos los valores calcYears a nuestro df con cbind, es decir juntamos una columna a nuestro df principal
+draftPlayer <- cbind(draftPlayer, calcYears, conference)
+head(draftPlayer)
+
+
+# ordenamos CRECIENTE por los anios que han pasado desde el anioDraft
+ordenado <- order(draftPlayer$calcYears, decreasing = TRUE)
+draftPlayer_ordered <- draftPlayer[ordenado,]
+head(draftPlayer_ordered)
+```
+
+
+## 3.7 ¿Cual es el número de años que más veces se repite entre que salen elegidos en el draft y se proclaman mejores jugadores? (moda de la variable tiempo)
+```{r}
+# con el df anterior calculamos la moda
+# Podemos crear la moda a través de una función ad-Hoc
+# creamos la funcion de Moda
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+
+# con el df anterior calculamos la moda
+getmode(draftPlayer_ordered$calcYears) # el anio mas repetido es 7
+
+
+# Visualizamos con table() el resumen de los anios desde el draft al anio que ha pasado a ser pla(yer of the week
+max(table(draftPlayer_ordered$calcYears))
+```
+
+```{r}
+# también podría realizar lo mismo con la libreria (modeest) que de momento no ejecuto
+# install.packages('modeest')
+# library(modeest)
+# mlv(draftPlayer_ordered$calcYears, method = "mfv")
+```
+
+
+
+```{r}
+# con summary podemos también extraer más datos,  el minimo y maximo, asi mediana, y quartiles, ya que lo estamos aplicado a valores numéricos a diferencia de valores con clase del tipo chars, cuando obtendríamos un resumen descriptivo.
+summary(draftPlayer_ordered$calcYears)
+```
+
+
+> El valor más frecuente es 7 anyos con 141 veces y 6 anyos con 140 anyos los anios que más veces se repite
+
+
+## 3.8 La altura de los jugadores está expresada en pies (aquellas con guión) y cm. Convertir la altura expresada en pies a centimetros [https://www.piesametros.info/](https://www.piesametros.info/). Posteriormente, eliminar el texto “cm” de los datos de tipo altura y convertir la variable en numérica. Calcular media, desviación típica y boxplot.
+```{r}
+# comprobamos con head() el formato de la variable height
+head(height)
+
+# y con tail() los últimos de la variable height
+tail(height)
+
+
+# nos percatamos que no son valores numéricos, y con summary() podemos corroborar la información
+summary(height)
+```
+
+
+```{r}
+# Primero vamos a contar los valores que incluyen el guión "-" con el package stringr::
+table(stringr::str_count(height, pattern = "-"))
+```
+
+
+> contamos 1055 los elementos que contienen los guiones "-" devolviendo TRUE o "1"
+deduzco que aplicando una función de conversión de altura de 1 a 1055 podría, pero no estoy seguro si todas las filas tienen este formato.
+
+```{r}
+# con la función stringr::str_replace efectuaremos la sustitución de los guiones por un puntos decimales "." y lo almacenamos con la variable heightFt
+height <- stringr::str_replace(height, pattern = "-", ".")
+head(height) # comprobamos si están realizados los cambios
+```
+
+> Pasamos ahora a convertir estos valores en centrimetros, dejando claro que podemos utilizar floor() para redondear los resultados a la baja, y además ya lo convierto en valores númericos
+
+```{r}
+# Convertimos los valores de pies a centimetros
+# Para ello he creado una funcion llamada convertCM() 
+# se añaden los valores en feet y devuelve el resultado en centrimetros. 
+# Primero hay que volver a analizar los datos porque no son numéricos
+# Para la actividad se tendra en cuenta el tipo del valor, si es character lo transforma primero en numerico o double) redondeado por los numeros enteros, es decir sin decimales
+#foot = as.numeric(strsplit(feet,'.')[[1]][1])
+#inches = as.numeric(strsplit(feet,'.')[[1]][2])
+
+convertCM <- function(feet){
+         ifelse(class(feet) != "character", cm <- floor(feet*30.48),
+         cm <- floor(type.convert(feet)*30.48))
+  return(cm)}
+
+# con la funcion creada transformamos los elementos de height de feet a cm con un ejemplo numerico
+x <- convertCM(6.5) # siendo ya numero devuelve la misma clase
+x
+
+y <- convertCM("6.5") # esta claro que es una clase tipo cadena de texto y pertanto lo transforma en numerico
+y
+class(y)
+```
+
+```{r}
+# siguiendo la logica comproboramos con nuestro vector height, primer elemento por ejemplo
+class(height[1])
+
+
+# convertimos los valores de 1 a 1055 en numericos y en centrimos a través de la función convertCM() y la variable nueva será heightFt
+heightFt <- convertCM(height[1:1055]) # Investigad correctamente si esto procede...
+class(heightFt)
+table(heightFt[1:10])
+str(heightFt)
+```
+
+```{r}
+# creamos la variable heightCm con los valores restante que tienen cm de height y utilizamos la función replace()
+heightCm <- as.numeric(stringr::str_replace(height[1056:1145], pattern = "cm", ""))
+table(heightCm)
+```
+
+> juntamos las dos variables heightFt y heightCm en una nueva con el nombre heightPly
+
+
+```{r}
+heightPly <- c(heightFt,heightCm)
+table(heightPly)
+str(heightPly)
+```
+
+
+> DESDE AQUI VOSOTROS
+
+
+
+### 3.9
+El peso de los jugadores está expresada en libras y kg. Convertir el peso expresado en kgs en libras [https://www.metric-conversions.org/es/peso/kilogramos-a-libras.htm](https://www.metric-conversions.org/es/peso/kilogramos-a-libras.htm). Convertir la variable en numérica.Calcular media, desviación típica y boxplot.
+
+```{r}
+
+```
+
+
+# 4 Información sobre posiciones en el campo y equipos.
+## 4.1 Fusionar las categorias de posición en el campo F,F-C y FC en la categoría genérica Forward. Fusionar las categorias G,G-F y GF en la categoria genérica Guard. Renombrar la categoría ‘PG’ como ‘Point Guard’, ‘SG’ como ‘Shooting Guard’, ‘SF’ como ‘Small Forward’, ‘PF’ como ‘Power Forward’ y ‘C’ como ‘Center’.
+```{r}
+
+```
+
+
+## 4.2 ¿En que posición ha sido más veces los jugadores de la semana nombrados?
+```{r}
+
+```
+
+
+## 4.3 ¿Cuántos equipos distintos hay?
+```{r}
+
+```
+
+
+
+## 4.4 ¿Cuáles son los cinco equipos que más veces han sido nombrados sus jugadores como jugador de la semana?
+```{r}
+
+```
+
+
+
+# 5 Información sobre jugadores. Estadísticos descriptivos.
+## 5.1 Crear una base datos denominada nba.unique en la que no se repita el nombre de ningún jugador.Trabajar a partir de ahora con esta base de datos.
+```{r}
+
+```
+
+
+## 5.2 Listar el nombre de los 10 jugadores más bajos que han sido nombrados alguna vez jugadores de la semana. No debe repetirse ningún nombre.
+```{r}
+
+```
+
+
+## 5.3 Listar el nombre de los 10 jugadores más altos que han sido nombrados y mostrar su altura. No debe repetirse ningún nombre.
+```{r}
+
+```
+
+
+# 6 Eliminación de outliers.
+## 6.1 Eliminar los outliers de la variable peso (Weight) y guardar en un data frame nba.avg
+```{r}
+
+```
+
+
+## 6.2 Comparar los boxplots de los datos originales en nba.unique y de los datos del peso de nba.avg
+```{r}
+
+```
+
+
+
+## 6.3 Interpretar los resultados
+```{r}
+
+```
+
+
+
+
+# 7 Clasificación de jugadores
+## 7.1 Añadir una columna al conjunto de datos denominada “Altura” que contenga los valores: {“bajo”, “normal”, “alto”}. La asignación del valor depende de la altura de cada jugador. Se asigna:
+- bajo: los 50 jugadores más bajos
+- alto: los 50 jugadores más altos
+- normal: el resto de jugadores
+```{r}
+
+```
+
+
+
+## 7.2 Añadir una columna al conjunto de datos denominada “Peso” que contenga los valores: {“bajo”, “normal”, “alto”}. La asignación del valor depende del peso de cada jugador. Se asigna:
+- bajo: los 50 jugadores con menor peso
+- alto: los 50 jugadores con mayor peso
+- normal: el resto de jugadores
+```{r}
+
+```
+
+
+
+## 7.3 Calcular la media y desviación típica del peso (Weight) según la clasificación de altura de los jugadores.
+```{r}
+
+```
+
+
+## 7.4 Realizar un boxplot del peso (Weight) según la clasificación de altura del jugador. Los boxplots deben estar ordenados de menos a mayor altura.
+```{r}
+
+```
+
+
+## 7.5 Hacer un listado con el nombre de jugadores que tienen una altura ‘normal’ y un peso ‘alto’. Ordenar alfabéticamente por nombre.
+```{r}
+
+```
+
+
+
+-----NO REALIZAR ESTE APARTADO ------
+
+
+
+
+# 8 Preparación de datos para la minería de datos
+>Se desea aplicar un modelo de minería de datos. Seguir los pasos siguientes:
+
+## 8.1 Incluir en el conjunto de datos original (nba) la clasificación del peso y la altura de los jugadores contenida en la base de datos nba.unique. Denomina este conjunto de datos dataset
+```{r}
+
+```
+
+
+
+## 8.2 Generar un conjunto de datos donde no se incluya la variable ‘Season’ ni la variable ‘Real_value’. Denomina este conjunto de datos dataset2
+```{r}
+
+```
+
+
+## 8.3 Verificar que no hay ningún valor NA. Si existen, eliminar las filas que los contienen. Denomina el conjunto de datos data.limpio.
+```{r}
+
+```
+
+
+
+
+## 8.4 Muestrear el conjunto de datos resultante en un conjunto de entrenamiento ‘train’ (70%) y un conjunto de test ‘test’ (30%)
+```{r}
+#install.packages(caTools)
+require(caTools) # para el train-test utilizamos la libreia(caTools)
+```
+
+
+
+## 8.5 Escribir los conjuntos de train y test en un fichero.
+```{r}
+write.csv(train, "train70.csv", row.names=FALSE)
+write.csv(test, "test30.csv", row.names=FALSE)
+```
+
+
+## 9 Realizar las mismas operaciones con un train-dev-test 75-15-15
+```{r}
+
+```
+
+

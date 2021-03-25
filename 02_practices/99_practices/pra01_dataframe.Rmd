@@ -32,7 +32,7 @@ names(datosAdult) <- c("age","workclass","fnlwgt","education","education-num","m
 
 ```{r}
 unique(datosAdult$education)
-unique(datosAdult$`education-num`)
+unique(datosAdult$`education-num`) # utilizamos las comillas ` para poder llamar los atributos de nombre compuestos o separados por guión -
 ```
 
 
