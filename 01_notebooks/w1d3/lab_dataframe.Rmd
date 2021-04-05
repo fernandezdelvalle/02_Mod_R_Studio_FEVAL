@@ -232,6 +232,7 @@ str(df_titanic)
 Procedemos con la representación gráfica de los atributos discretizados anteriormente
 
 ```{r}
+library(ggplot2)
 # visualizamos la relación de las vars "Sex" y "Survived"
 dim(df_titanic)[1]
 
