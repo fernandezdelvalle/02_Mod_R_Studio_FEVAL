@@ -18,6 +18,10 @@ Los pasos a realizar son:
 - [ ] exploración
 - [ ] limpieza
 - [ ] discretización
+- [ ] normalización
+- [ ] creación de nuevo atributo
+- [ ] visualización exhaustiva
+- [ ] primeras conclusiones
 
 
 Intentar crear el output de salida en formato HTML (buscar info de `knit` y sus dependencias)

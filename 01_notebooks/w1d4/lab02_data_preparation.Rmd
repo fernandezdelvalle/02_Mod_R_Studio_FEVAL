@@ -62,7 +62,7 @@ Para resolver la actividad, deberéis usar algunos comandos de R que quizás no 
 *Leer el fichero de datos “NBA_player_of_the_week.csv” y guardar los datos en un objeto con identificador denominado nba.*
 
 ```{r}
-nba<-read.csv("../../02_PROGRAMA_R_STUDIO/99_data/NBA_player_of_the_week.csv",header = TRUE)
+nba<-read.csv("../../99_data/NBA_player_of_the_week.csv",header = TRUE)
 nba
 ```
 
@@ -122,11 +122,12 @@ nba_bak <- nba
 
 
 ```{r}
-#nba$Conference<-(nba$Conference)
+nba$Conference<-(nba$Conference)
 ```
 
 ```{r}
-conf
+# Con summary contaremos el total de las filas por atributo.
+summary(nba$Conference)
 ```
 
 *Asignar NA a los valores ausentes en los datos de `Conference`.*
@@ -347,7 +348,7 @@ str(heightPly)
 ```
 
 
-> DESDE AQUI VOSOTROS
+
 
 
 
@@ -355,60 +356,221 @@ str(heightPly)
 El peso de los jugadores está expresada en libras y kg. Convertir el peso expresado en kgs en libras [https://www.metric-conversions.org/es/peso/kilogramos-a-libras.htm](https://www.metric-conversions.org/es/peso/kilogramos-a-libras.htm). Convertir la variable en numérica.Calcular media, desviación típica y boxplot.
 
 ```{r}
-
+# comprobamos con head() el formato de la variable weight
+head(weight)
 ```
+
+
+```{r}
+# comprobamos con tail() el formato de la variable weight
+tail(weight)
+```
+
+```{r}
+# Creamos una función para convertir los valores de libras a kilos de las filas 1056-1145
+makeWeightNum <- function(x){
+    if(grepl('kg',x) == TRUE){
+        return(as.numeric(gsub('kg','',x)))
+    }else{
+        return(as.integer(x)*2.205)
+      }
+}
+```
+
+
+
+```{r}
+# otra alternativa siempre para aplicar de 1056-1145
+convertkg <- function(kg){
+         ifelse(class(kg) != "character", libras <- floor(kg*2.2046),
+         libras <- floor(type.convert(kg)*2.2046))
+  return(libras)}
+```
+
+
+
+
+
+```{r}
+# transformamos los valores de libras a kilos con una nueva variable weightLb_kg
+x <- convertkg(200)
+x
+```
+
+
+```{r}
+y <- convertkg("200")
+y
+```
+
+```{r}
+weightPly <- as.numeric(round(makeWeightNum(weight[1:1055])))
+weightLb <- as.numeric(makeWeightNum(weight[1056:1145]))
+table(weightPly)
+table(weightLbs)
+```
+
+
+
+
+```{r}
+nba$Weight[1056:1145] <- sapply(X = nba$Weight[1056:1145], FUN = makeWeightNum)
+table(nba$Weight)
+#
+# --- PENDIENTE ---
+```
+
+
 
 
 # 4 Información sobre posiciones en el campo y equipos.
 ## 4.1 Fusionar las categorias de posición en el campo F,F-C y FC en la categoría genérica Forward. Fusionar las categorias G,G-F y GF en la categoria genérica Guard. Renombrar la categoría ‘PG’ como ‘Point Guard’, ‘SG’ como ‘Shooting Guard’, ‘SF’ como ‘Small Forward’, ‘PF’ como ‘Power Forward’ y ‘C’ como ‘Center’.
 ```{r}
-
+pos <- nba$Position
+table(pos)
 ```
+
+
+```{r}
+class(pos)
+head(pos)
+
+# Modificación de la estructura de los levels
+levels(pos) <- list("Center" = "C",
+                    "Forward" = c("F", "F-C", "FC"),
+                    "Guard" = c("G", "G-F", "GF"),
+                    "Power Forward" = "PF",
+                    "Point Guard" = "PG",
+                    "Small Forward" = "SF",
+                    "Shooting Guard"= "SG"
+                    )
+head(pos)
+table(pos)
+```
+
+
 
 
 ## 4.2 ¿En que posición ha sido más veces los jugadores de la semana nombrados?
 ```{r}
-
+# Creamos un dataframe con un subset de columnas
+attach(nba)
+draftPly3 <- data.frame(player,pos,team,draftYear,shortSeason, season, calcYears,weightPly, heightPly, conference)
+head(draftPly3)
 ```
+
+```{r}
+# buscamos ahora el jugador que más veces ha sido nombrado y su posición
+tail(names(sort(table(draftPly3$player))),1)
+```
+
+```{r}
+#y también otra manera de buscar devolviendo el número de veces
+sort(table(draftPly3$player), decreasing = TRUE)[1]
+```
+
+```{r}
+# y también otra manera de buscar devolviendo el número de veces de los 5 primeros
+sort(table(draftPly3$player), decreasing = TRUE)[1:5]
+```
+
 
 
 ## 4.3 ¿Cuántos equipos distintos hay?
 ```{r}
+str(unique(draftPly3$team))
+```
 
+```{r}
+levels(draftPly3$team)
+```
+
+```{r}
+# se podría realizar con dplyr::n_distinct() para conocer los valores unicos
+dplyr::n_distinct(draftPly3$team) # para ello necesitamos cargar la libreria dplyr
 ```
 
 
 
 ## 4.4 ¿Cuáles son los cinco equipos que más veces han sido nombrados sus jugadores como jugador de la semana?
 ```{r}
-
+sort(table(draftPly3$team), decreasing = TRUE)[1:5]
 ```
 
 
 
 # 5 Información sobre jugadores. Estadísticos descriptivos.
 ## 5.1 Crear una base datos denominada nba.unique en la que no se repita el nombre de ningún jugador.Trabajar a partir de ahora con esta base de datos.
-```{r}
 
+```{r}
+# creo desde el draftPly3 las mismas columnas solo que con la función unique() serán solo referente a jugadores unicos
+
+nba.unique <- draftPly3[unique(draftPly3$player),]
+head(nba.unique)
 ```
+
+```{r}
+nba.unique2 <- draftPly3[!duplicated(draftPly3$player),] # con la función duplicated() tiene en cuenta los valores duplicados
+head(nba.unique2)
+```
+
+```{r}
+str(nba.unique2)
+```
+
 
 
 ## 5.2 Listar el nombre de los 10 jugadores más bajos que han sido nombrados alguna vez jugadores de la semana. No debe repetirse ningún nombre.
 ```{r}
-
+# listamos los 10 jugadores más bajos
+shortestPly <- nba.unique2[order(nba.unique2$heightPly, decreasing = FALSE),][1:10,]
+shortestPly #ejectutamos
 ```
 
 
 ## 5.3 Listar el nombre de los 10 jugadores más altos que han sido nombrados y mostrar su altura. No debe repetirse ningún nombre.
 ```{r}
+# listamos los 10 jugadores más bajos
+tallestPly <-nba.unique2[order(nba.unique2$heightPly, decreasing = TRUE),][1:10,]
+tallestPly
+```
 
+```{r}
+# creamos un boxplot los 10 jugadores más altos
+boxplot(tallestPly$heightPly, ylab="height", xlab="Shortest NBA\'players", col=("red"))
 ```
 
 
 # 6 Eliminación de outliers.
 ## 6.1 Eliminar los outliers de la variable peso (Weight) y guardar en un data frame nba.avg
 ```{r}
+# summary del peso de los jugadores
+summary(nba.unique2$heightPly)
+```
 
+
+```{r}
+# boxplot por altura
+boxplot.stats(nba.unique2$heightPly, do.conf = TRUE, do.out = FALSE, coef = 1.5)
+```
+
+```{r}
+# recogemos los outliers 
+outliers <- boxplot.stats(nba.unique2$heightPly)$out
+outliers
+```
+
+```{r}
+# buscamos el outlier 300 y 400 en nuestro dataframe a nivel de índice y lo guardamos como una nueva variable
+index <- which( nba.unique2$weightPly %in% outliers)
+index
+```
+
+
+```{r}
+# eliminamos los outliers y lo guardamos en nuevo dataframe nba.avg
+nba.avg <- nba.unique2$weightPly[-index]
+head(nba.avg) # saco una muestra
 ```
 
 
@@ -433,8 +595,17 @@ El peso de los jugadores está expresada en libras y kg. Convertir el peso expre
 - alto: los 50 jugadores más altos
 - normal: el resto de jugadores
 ```{r}
-
+# creamos conjunto de datos altura "bajo","normal","alto"
+summary(nba.unique2$heightPly)
 ```
+
+
+```{r}
+# creamos conjunto de datos altura "bajo","normal","alto"
+nba.unique2$AlturaGrp <- cut(nba.unique2$heightPly,3,label=c("bajo","normal","alto"))
+head(nba.unique2)
+```
+
 
 
 
@@ -443,27 +614,59 @@ El peso de los jugadores está expresada en libras y kg. Convertir el peso expre
 - alto: los 50 jugadores con mayor peso
 - normal: el resto de jugadores
 ```{r}
+# creamos conjunto de datos altura "bajo","normal","alto"
+summary(nba.unique2$weightPly)
 
+# creamos conjunto de datos peso "bajo","normal","alto"
+nba.unique2$PesoGrp <- cut(nba.unique2$weightPly,3,label=c("bajo","normal","alto"))
+head(nba.unique2)
+```
+
+
+
+```{r}
+for (i in num_column ){
+  if(i <= 50){Peso[i]<- "alto"}
+  if(i > 50 && i <= 247){Peso[i]<- "normal"}
+  if(i > 247 ) {Peso[i]<- "bajo"}
+}
 ```
 
 
 
 ## 7.3 Calcular la media y desviación típica del peso (Weight) según la clasificación de altura de los jugadores.
 ```{r}
-
+# media del peso seguún altura de los jugadores
+meanWeight<- tapply(nba.unique2$weightPly, nba.unique2$heightPly, mean)
+meanWeight
 ```
 
 
 ## 7.4 Realizar un boxplot del peso (Weight) según la clasificación de altura del jugador. Los boxplots deben estar ordenados de menos a mayor altura.
 ```{r}
-
+# desviación típica del peso seguón la altura
+sdAltura<- tapply(nba.unique2$weightPly, nba.unique2$Altura, sd)
+sdAltura
 ```
 
 
 ## 7.5 Hacer un listado con el nombre de jugadores que tienen una altura ‘normal’ y un peso ‘alto’. Ordenar alfabéticamente por nombre.
 ```{r}
-
+# ordenar jugadores altura "normal", peso"alto", alfabeticamente
+ply3 <- subset(nba.unique2, subset = nba.unique2$Altura == "normal" & nba.unique2$Peso == "alto")
+ordPly3 <- sort(nba.unique2[(nba.unique2$Altura=="normal")&(nba.unique2$Peso=="alto"),]$player)
+ply3
 ```
+
+OUTPUT ESPERADO
+
+head(ordPly3)
+
+## [1] Bradley Beal     Jerry Stackhouse
+## 274 Levels: Aaron McKie Adrian Dantley Al Harrington ... Zydrunas Ilgauskas
+
+
+
 
 
 
