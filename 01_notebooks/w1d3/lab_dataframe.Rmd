@@ -229,6 +229,26 @@ str(df_titanic)
 
 ## Procesos de análisis del conjunto de datos
 
+
+```{r}
+colSums(is.na(df_titanic))
+```
+
+```{r}
+summary(df_titanic[, "Age"])
+```
+
+```{r}
+# Realizamos la discretización
+df_titanic["segmento_age"] <- cut(df_titanic$Age, 
+                         breaks = c(0,10,25,45,55,65,75,100),
+                         labels = c("0-10", "10-24", "25-44", "45,54", "55,64",
+                                    "65-74","75-100"))
+head(df_titanic$segmento_age)
+```
+
+
+
 Procedemos con la representación gráfica de los atributos discretizados anteriormente
 
 ```{r}
