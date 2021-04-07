@@ -261,3 +261,255 @@ flights_dt %>%
   geom_bar()
 ```
 
+## Representación de los vuelos con retraso
+
+```{r}
+flights_dt %>%
+  mutate(minute = minute(dep_time)) %>%
+  group_by(minute) %>%
+  summarize(
+    avg_delay = mean(arr_delay, na.rm = T),
+    n = n()) %>%
+  ggplot(aes(minute, avg_delay)) +
+  geom_line()
+```
+
+
+
+
+```{r}
+sched_dep <- flights_dt %>%
+  mutate(minute = minute(sched_dep_time)) %>%
+  group_by(minute) %>%
+  summarize(
+    avg_delay = mean(arr_delay, na.rm = TRUE),
+    n = n())
+
+  ggplot(sched_dep, aes(minute, avg_delay)) +
+  geom_line()
+```
+
+
+## Duration, Periods, Intervals
+
+```{r}
+# Duration es igual a la diferencia entre fecha actual (period) y fecha inicio
+age <- today() - ymd(19810104)
+age
+```
+
+```{r}
+as.duration(age) # esta función siempre devolverá los segundos de duración
+```
+
+```{r}
+# separamos por componentes del tiempo
+dseconds(15)
+```
+
+
+```{r}
+dminutes(10)
+```
+
+
+```{r}
+dhours(c(12,16))
+```
+
+```{r}
+ddays(0:5)
+```
+
+```{r}
+dweeks(3)
+```
+
+
+```{r}
+dyears(1)
+```
+
+
+### Realizamos operaciones con la duración
+
+```{r}
+# realizamos una operación sencilla
+2 * dyears(1)
+```
+
+
+```{r}
+dyears(1) + dweeks(2) + dhours(18)
+```
+
+```{r}
+now()
+```
+
+```{r}
+#last_year
+```
+
+```{r}
+dweeks(dyears(2))
+```
+
+```{r}
+years(1)
+```
+
+```{r}
+dyears(1)
+```
+
+
+```{r}
+dyears(1) == years(1)
+```
+
+
+```{r}
+#tomorrow
+```
+
+
+## Conversiones de zonas horarias
+
+```{r}
+one_pm <- ymd_hms(
+  "2021-04-07 13:00:00",
+  tz = "Europe/Madrid"
+)
+one_pm
+```
+
+
+```{r}
+one_pm_solar <- ymd_hms(
+  "2021-03-10 13:00:00",
+  tz = "Europe/Madrid"
+)
+one_pm_solar
+```
+
+
+
+```{r}
+one_pm + ddays(1)
+```
+
+
+```{r}
+one_pm_solar + dweeks(3) # le aplicamos el cambio de hora legal
+```
+
+
+```{r}
+one_pm + dmonths(7) # le aplicamos el cambio de hora solar 
+# Investigamos el porque cambia a 30 min en lugar de quitar una hora!!!
+```
+
+
+```{r}
+flights_dt %>%
+  filter(arr_time < dep_time)
+```
+
+
+```{r}
+# transformaciones de los datos creando una nueva columna overnight
+flights_dt <- flights_dt %>%
+  mutate(
+    overnight = arr_time < dep_time,
+    arr_time = arr_time + days(overnight * 1),
+    sched_arr_time = sched_arr_time + days(overnight * 1)
+  )
+flights_dt
+```
+
+
+```{r}
+# realizamos un check a los vuelos nocturnos donde implica cambio de hora
+flights_dt %>%
+  filter(overnight, arr_time < dep_time)
+```
+
+
+### Intervalos
+
+```{r}
+years(1) / days(1)
+```
+
+
+```{r}
+#next_year
+```
+
+
+```{r}
+Sys.time()
+```
+
+```{r}
+Sys.timezone()
+```
+
+```{r}
+Sys.Date()
+```
+
+```{r}
+length(OlsonNames()) # mostramos las diferentes zona horarias
+```
+
+
+```{r}
+head(OlsonNames())
+```
+
+```{r}
+tail(OlsonNames())
+```
+
+```{r}
+a <- ymd_hms("2020-04-07 14:00:00", tz = "Europe/Madrid")
+b <- ymd_hms("2020-04-07 22:00:00", tz = "Australia/Sydney")
+c <- ymd_hms("2020-04-07 08:00:00", tz = "America/New_York")
+```
+
+```{r}
+a
+b
+c
+```
+
+
+```{r}
+a - b
+```
+
+
+
+```{r}
+b - c
+```
+
+```{r}
+a <- ymd_hms("2020-04-07 12:00:00", tz = "Europe/Madrid")
+b <- ymd_hms("2020-04-07 12:00:00", tz = "Australia/Sydney")
+c <- ymd_hms("2020-04-07 12:00:00", tz = "America/New_York")
+```
+
+
+
+```{r}
+a - b
+```
+
+
+```{r}
+a - c
+```
+
