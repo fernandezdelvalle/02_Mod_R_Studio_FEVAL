@@ -15,13 +15,29 @@ https://archive.ics.uci.edu/ml/datasets/adult
 
 **IMPORTANTE**:
 Los pasos a realizar son:
-- [ ] exploración
-- [ ] limpieza
+- [X] exploración
+- [X] limpieza
 - [ ] discretización
 - [ ] normalización
 - [ ] creación de nuevo atributo
 - [ ] visualización exhaustiva
 - [ ] primeras conclusiones
+- [ ] realizar una agrupación con el método de agregación kmeans
+
+
+### Importamos las librerías
+
+```{r}
+library(ggplot2)
+library(functional)
+library(plyr)
+library(dplyr)
+library(VIM)
+library(gridExtra)
+library(vcd)
+library(ggcorrplot)
+library(questionr)
+```
 
 
 Intentar crear el output de salida en formato HTML (buscar info de `knit` y sus dependencias)
@@ -56,4 +72,291 @@ if (datosAdult$education[i] %in% E18){
 }
 table(datosAdult$education)
 ```
+
+2.3 Búsqueda de datos faltantes y outliers
+2.3.1 Variables numéricas
+
+A continuación se extraen las estadísticas básicas de las variables cuantitativas:
+
+
+```{r}
+dt_headers <- c("age", "workclass", "fnlwgt", "education", "education_num",
+                "marital_status", "occupation", "relationship", "race", "sex",
+                "capital_gain", "capital_loss", "hours_per_week", 
+                "native_country", "income")
+dt <- read.table(
+   "https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data", 
+   header = FALSE, 
+   fill = FALSE, 
+   sep = ",", 
+   col.names = dt_headers, 
+   stringsAsFactors = TRUE
+   )
+```
+
+
+```{r}
+summary(dt[,sapply(dt, is.numeric)])
+```
+
+```{r}
+p1 <- ggplot(dt, aes(x = fnlwgt)) + 
+      geom_density(fill = 'skyblue3') + 
+      ggtitle("Distribución de pesos")
+p2 <- ggplot(dt, aes(x = age, y = ..count.., weight = fnlwgt)) + 
+      geom_histogram(fill = 'skyblue', bins = 74) + 
+      ggtitle("Distribución de edades")
+p3 <- ggplot(dt, aes(x = capital_gain, y = ..count..+1, weight = fnlwgt)) + 
+      scale_y_log10() + 
+      geom_histogram(fill = 'skyblue') + 
+      ggtitle("Ganacias de capital") + 
+      xlab("count")
+p4 <- ggplot(dt, aes(x = capital_loss, y = ..count..+1, weight = fnlwgt)) + 
+      scale_y_log10() + 
+      geom_histogram(fill = 'skyblue') + 
+      ggtitle("Pérdidas de capital") + 
+      xlab("count")
+p5 <- ggplot(dt, aes(x = hours_per_week, weight = fnlwgt)) + 
+      geom_histogram(fill = 'skyblue') + 
+      ggtitle("Horas de trabajo por semana")
+
+grid.arrange(p1, p2, p3, p4, p5, nrow=3, 
+             layout_matrix = cbind(c(1, 3, 5), c(2, 4, 5)))
+```
+
+Tras considerar la distribución de las variables, los valores extremos y su frecuencia se extraen las siguientes conclusiones:
+
+    La distribución de la variable age está sesgada hacia la izquierda.
+    La variable hours_per_week se presenta un fuerte pico en 40h/w, que es el estándar de contrato laboral dominante.
+    Los ingresos por inversión de capital son sensiblemente más frecuentes y de mayor cuantía que las pérdidas. Dado que, como sería de esperar, en la mayor parte de los registros los ingresos y pérdidas por inversiones de capital son nulos, se considera de interés Crear una nueva variable con el balance neto de las ganancias menos las pérdidas de capital.
+    Ninguna de las variables tiene valores faltantes. Sin embargo, si que se detecta la presencia de posibles valores testigo:
+        hours_per_week = 99: se considera que 99 horas de trabajo por semana podría ser un dato extremo correcto, debido a relativa baja frecuencia del dato y y la presencia de otros valores cercanos. De igual manera se han encontrado antecedentes documentados en internet sobre casos de empleados que desempeñan su labor durante largos periodos. Más información.
+        capital_gain = 99.999: se concluye que 99.999 es un valor testigo, debido a lo inusual de la cifra, a la elevada distancia a los datos más cercanos (que son inferiores a la mitad) y a su reiterada aparición (alta frecuencia). En el [modificar!] se evaluará el modo de imputación más apropiado.
+
+```{r}
+dt$capital_gain[dt$capital_gain == 99999] <- NA
+```
+
+2.3.2 Variables categóricas
+
+A pesar de que los tipos interpretados son los correctos, se ha introducido un espacio innecesario al principio de los niveles de las variables categóricas, que se corrige a continuación. Seguidamente se verifican los niveles de las variables categóricas:
+
+
+```{r}
+# Trim white spaces around factor levels.
+dt <- as.data.frame(lapply(
+   dt, 
+   FUN = function(x) if (is.factor(x)) factor(trimws(x)) else x
+   ))
+
+# Display factor levels.
+aux <- lapply(dt, levels)
+aux[!sapply(aux, is.null)]
+```
+
+
+Algunas variables tienen categorías con nombres ambiguos, que se explicarán a continuación:
+
+    En workclass : las categorías Self-emp-inc y Self-emp-not-inc responden a trabajadores por cuenta propia integrados o no integrados en entidades corporativas. Se pueden obtener más detalles respecto a las implicaciones sociológicas aquí.
+    En marital-status : Married-AF-spouse y Married-civ-spouse son cónyuges en las fuerzas armadas y cónyuges civiles respectivamente.
+    En native-country : hay dos categorías que no se corresponden con el nombre de un país: Hong y South. En el apartado [modificar!] se tratarán estos datos.
+    En education : algunas de las categorías no son comunes en el ámbito español y requieren de explicación:
+        Some-college representa personas que han iniciado pero no concluido estudios universitarios.
+        Assoc-voc representas estudios superiores vocacionales (equivalentes a ciclos formativos), que son considerados de nivel inferior a las titulaciones universitarias de dos años.
+        Assoc-acdm son estudios universitarios de dos años de duración. De esta manera, el orden de la variable sería: “Preschool” < “1st-4th” < “5th-6th” < “7th-8th” < “9th” < “10th” < “11th” < “12th” < “HS-grad” < “Some-college” < “Assoc-voc” < “Assoc-acdm” < “Bachelors” < “Masters” < “Prof-school” < “Doctorate”.
+
+
+```{r}
+dt$education <-factor(dt$education, ordered = TRUE , 
+                      levels=c("Preschool", "1st-4th",  "5th-6th", "7th-8th", 
+                               "9th", "10th", "11th", "12th", "HS-grad", 
+                               "Some-college", "Assoc-voc", "Assoc-acdm", 
+                               "Bachelors", "Masters", "Prof-school", 
+                               "Doctorate"))
+```
+
+
+A continuación se visualizan gráficamente la distribución de las variables, teniendo en cuenta sus pesos correspondientes. Se ha optado por mostrar las gráficas de frecuencia agrupadas por contenidos que se consideran especialmente relacionados: de workclass y occupation; education y education_num; race y native_country; y finalmente, marital_status, relationship y sex. Con el objetivo de poder visualizar mejor la gráfica de país de procedencia, se emplea una escala semilogarítmica.
+
+
+```{r}
+p1 <- ggplot(dt, aes(x = workclass, weight = fnlwgt)) + 
+      geom_bar(fill = 'skyblue3') + 
+      ggtitle("Tipo de empleo") + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+p2 <- ggplot(dt, aes(x = occupation, weight = fnlwgt)) + 
+      geom_bar(fill = 'skyblue3') + 
+      ggtitle("Sector laboral") + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) 
+p3 <- ggplot(dt, aes(x = education, weight = fnlwgt)) + 
+      geom_bar(fill='skyblue3') + 
+      ggtitle("Nivel de estudios") +
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+p4 <- ggplot(dt, aes(x = education_num, weight = fnlwgt)) + 
+      geom_bar(fill = 'skyblue3') + 
+      ggtitle("Años de estudio") + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+p5 <- ggplot(dt, aes(x = race, weight = fnlwgt)) + 
+      geom_bar(fill = 'skyblue3') + 
+      ggtitle("Grupo Étnico") + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+p6 <- ggplot(dt, aes(x = native_country, weight = fnlwgt)) + 
+      geom_bar(fill = 'skyblue3') + 
+      ggtitle("País de origen") + 
+      scale_y_log10() + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+p7 <- ggplot(dt, aes(x = marital_status, weight = fnlwgt)) + 
+      geom_bar(fill = 'skyblue3') + 
+      ggtitle("Estado civil") + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+p8 <- ggplot(dt, aes(x = relationship, weight = fnlwgt)) + 
+      geom_bar(fill = 'skyblue3') + 
+      ggtitle("Rol en el ámbito familiar") + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+p9 <- ggplot(dt, aes(x = sex, weight = fnlwgt)) + 
+      geom_bar(fill='skyblue3') + 
+      ggtitle("Sexo") + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+grid.arrange(p1, p2, p3, p4, p5, p6, p7, p8, p9, nrow=4,
+             layout_matrix=rbind(c(1,1,1,2,2,2),
+                                 c(3,3,3,4,4,4),
+                                 c(5,5,6,6,6,6),
+                                 c(7,7,7,8,8,9)))
+```
+
+
+Se observa que:
+
+    Las variables workclass, occupation y native_country contienen la categoría ‘?’ , que se considera la representación del valor desconocido y será procesada en el apartado Tratamiento de valores faltantes.
+    Se identifica un número de registros desconocidos similar entre workclass y occupation. A continuación se demuestra que la mayor parte de los casos, los datos faltan simultáneamente dos campos:
+
+
+```{r}
+sum("&"(dt$occupation == '?', dt$workclass == '?'))
+```
+
+
+
+```{r}
+sum(dt$occupation == '?')
+```
+
+
+```{r}
+sum(dt$workclass == '?')
+```
+
+
+
+
+    Las clases education y education_num tienen gráficas de distribución idénticas y parecen contener los mismos datos. Esta similitud se estudiará en el apartado Reducción de atributos.
+
+    Se observa un fuerte desbalance inesperado en la variable dicotómica sex , que probablemente guarde relación con la aún menor penetración de la mujer en el mercado laboral.
+
+2.4 Creación del atributo capital
+
+Se considera innecesario tratar los ingresos y las pérdidas por inversión de capital de forma separada, por lo que se crea una nueva variable con valor neto de los ingresos por inversión definida como la diferencia entre las ganancias y las pérdidas,
+
+
+```{r}
+dt$capital <- dt$capital_gain - dt$capital_loss
+dt[,c("capital_gain", "capital_loss")] <- NULL
+summary(dt)
+```
+
+
+2.6 Discretización de variables.
+
+Se decide discretizar la variables age . Se ha observado que la distribución está sesgada hacia la izquierda y contenida entre 17 y 90. Dada la falta de normalidad de la variable se decide discretizarla en segmentos constantes de cinco años.
+
+```{r}
+dt$age <- cut(dt$age, breaks = seq(15, 90, 5))
+plot(dt$age)
+```
+
+
+```{r}
+# otra alternativa
+dt["segmento_edad"] <- 
+  cut(datosAdult$age, breaks = c(10,20,30,40,50,60,70,100),  # he realizado el cambio desde el DF original
+      labels = c("10-19", "20-29", "30-39","40-49","50-59","60-69","70-79"))
+plot(dt$segmento_edad)
+```
+
+
+
+```{r}
+# creando un nuevo atributo con una discretización
+dt["seg_horas_semana"] <- 
+  cut(datosAdult$`hour-per-week`, breaks = c(0,20,30,40,50,60,70,100), 
+      labels = c("<=19","20-29","30-39","40-49","50-59","60-69",">=70"))
+plot(dt$seg_horas_semana)
+```
+
+
+
+```{r}
+ggplot(data=dt,aes(x=segmento_edad,fill=sex))+geom_bar()
+```
+
+
+```{r}
+ggplot(data=dt,aes(x=segmento_edad,fill=seg_horas_semana))+
+  geom_bar()+facet_wrap(~seg_horas_semana)+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+
+```{r}
+ggplot(data = dt,aes(x=seg_horas_semana,fill=income))+
+  geom_bar(position="fill")+
+  ylab("Frecuencia") +facet_wrap(~relationship)+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+
+```{r}
+dt['capital_total']<-datosAdult$`capital-gain` - datosAdult$`capital-loss`
+summary(dt$capital_total)
+```
+
+
+```{r}
+ggplot(data = dt,aes(x=sex,fill=income))+
+  geom_bar(position="fill")+
+  facet_wrap(~native_country)+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+```{r}
+ggplot(data=dt[1:filas,],aes(x=native_country))+geom_bar()+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  labs(title="Totales", x ="native_country", y = "Total")
+```
+
+
+
+
+2.7 Estandarización de variables
+
+Dado que en la imputación de valores se empleará el método basado en las distancias kNN, se procede primeramente a la estandarización de las variables numéricas. A tal fin se emplea la función de escalado de R scale.
+
+
+```{r}
+# Mean and standard deviation of the variable *hours_per_week*
+hours_per_week_mean = mean(dt$hours_per_week)
+hours_per_week_sd = sd(dt$hours_per_week)
+
+# Standarize variables
+dt$hours_per_week <- scale(dt$hours_per_week, center = TRUE, scale = TRUE)
+dt$capital <- scale(dt$capital, center = TRUE, scale = TRUE)
+summary(dt)
+
+```
+
+
+2.2.8 Matriz de covarianzas
+
+Se convierte todas las variables categóricas en representaciones numéricas, para luego calcular la matriz de correlación de todas las variables.
 
