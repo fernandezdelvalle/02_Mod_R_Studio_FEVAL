@@ -1,0 +1,150 @@
+---
+title: "02_lab_Métodos_de_agregación_datos_reales"
+author: "Marco R."
+date: "6/4/2021"
+output: html_document
+---
+
+# Métodos de agregación con datos reales
+
+A continuación vamos a ver otro ejemplo de cómo se usan los modelos de agregación. Para ello usaremos el fichero iris.csv. Esta base de datos se encuentra descrita en https://archive.ics.uci.edu/ml/datasets/iris. 
+
+
+```{r}
+iris_data<-read.csv("http://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data", header=T, sep=",")
+attach(iris_data)
+colnames(iris_data) <- c("sepalLength", "sepalWidth", "petalLength", "petalWidth", "class")
+summary(iris_data)
+```
+
+La idea de utilizar un método de agregación es de realizar la correcta atribución a una clase u otra (setosa, virginica, versicolor). Del dataset anterior quitaremos la clase para poder aplicar el método kmeans
+
+```{r}
+x <- iris_data[,1:4] # solo incluimos nuestras variables excepto la clase
+```
+
+
+```{r}
+# como en teoría no conocemos el número óptimo de clústers, probamos con varios valores
+d <- daisy(x)
+resultados <- rep(0, 10)
+for (i in c(2,3,4,5,6,7,8,9,10))
+{
+  fit <- kmeans(x, i)
+  y_cluster <- fit$cluster
+  sk <- silhouette(y_cluster, d)
+  resultados[i] <- mean(sk[,3])
+}
+
+```
+
+
+Mostramos los valores de las siluetas media de cada prueba para comprobar que número de clúster es el óptimo.
+
+
+```{r}
+plot(2:10, resultados[2:10], type='o', col='blue', pch=0, 
+     xlab="Número de clústers",
+     ylab="Silueta")
+```
+
+El mejor porcentaje de calidad de clúster es k2 = ~70%
+
+Aunque el valor esperado es k=3, dado que el conjunto original tiene 3 clases, el mejor valor que se obtiene es k=2.
+
+
+Otro forma de evaluar cual es el mejor número de clústers es considerar el mejor modelo, aquel que ofrece la menor suma de los cuadrados de las distancias de los puntos de cada grupo con respecto a su centro (**withinss**), con la mayor separacion entre centros de grupos (**betweenss**). Como se puede comprobar es una idea conceptualmente similar a la silueta. 
+
+Una manera común de hacer la selección del número de clústers consiste en aplicar el método **elbow** (codo), que no es más que la selección del número de clústers en base a la inspección de la gráfica que se obtiene al iterar con el mismo conjunto de datos para distintos valores del número de clústers. Se seleccionará el valor que se encuentra en el “codo” de la curva
+
+
+```{r}
+resultados <- rep(0, 10)
+for (i in c(2,3,4,5,6,7,8,9,10))
+{
+  fit           <- kmeans(x, i)
+  resultados[i] <- fit$tot.withinss
+}
+plot(2:10,resultados[2:10],type="o",col="blue",pch=0,xlab="Número de clusters",ylab="tot.tot.withinss")
+```
+
+Con la técnica tot.withiniss podría ser tanto el k=2 que k=5
+
+
+También se puede usar la función **kmeansruns** del paquete fpc que ejecutá el algoritmo kmeans con un conjunto de valores y selecciona el valor del número de clústers que mejor funcione de acuerdo a dos criterios la silueta media (“asw”) y Calinski-Harabasz (“ch”).
+
+```{r}
+library(fpc)
+fit_ch  <- kmeansruns(x, krange = 1:10, criterion = "ch") 
+fit_asw <- kmeansruns(x, krange = 1:10, criterion = "asw") 
+```
+
+
+Podemos comprobar el valor con el que se ha obtenido el mejor resultado y también mostrar el resultado obtenido para todos los valores de k usando ambos criterios
+
+```{r}
+fit_ch$bestk
+```
+
+
+```{r}
+fit_asw$bestk
+```
+
+
+
+```{r}
+plot(1:10,fit_ch$crit,type="o",col="blue",pch=0,xlab="Número de clústers",ylab="Criterio Calinski-Harabasz")
+```
+
+
+
+```{r}
+plot(1:10,fit_asw$crit,type="o",col="blue",pch=0,xlab="Número de clústers",ylab="Criterio silueta media")
+```
+
+
+### Pasamos a la visualización de los clústers
+
+```{r}
+iris3clusters <- kmeans(x, 3)
+
+# sepalLength y sepalWidth
+plot(x[c(1,2)], col=iris3clusters$cluster)
+```
+
+
+```{r}
+plot(x[c(1,2)], col=iris_data$class) # es la comprobación con la etiqueta CLASS del dataset
+```
+
+
+
+```{r}
+# Analizamos ahora con respecto al pétalo
+# petalLength y petalWidth
+plot(x[c(3,4)], col=iris3clusters$cluster)
+
+
+```
+
+
+
+
+```{r}
+plot(x[c(3,4)], col=iris_data$class) # comprobamos con CLASS de nuestro dataset
+```
+
+
+La mejor forma de evaluar los resultados y la clasificación por su grupo de apartenencia podemos crear una matriz de confusión, típica en los métodos supervisados de clasificación
+
+```{r}
+table(iris3clusters$cluster,iris_data$class)
+```
+
+
+
+```{r}
+100*(49 + 48 + 36)/(133+(2+14)) # evalua la calidad de clasificación en %
+```
+

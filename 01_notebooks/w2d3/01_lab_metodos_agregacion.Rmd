@@ -1,0 +1,169 @@
+---
+title: "01_lab_Métodos_de_agregación_datos_autogenerados"
+author: "Marco R."
+date: "6/4/2021"
+output: html_document
+---
+
+# Métodos de agregación con datos autogenerados
+
+En este ejemplo vamos a generar un conjunto de muestras aleatorias para posteriormente usar el **algoritmo kmeans** para agruparlas. Se crearán las muestras alrededor de dos puntos concretos. Por lo tanto, lo lógico será agrupar en dos clústers. Puesto que inicialmente, en un problem real, no se conoce cual es el número correcto de clústers k, vamos a probar primero con dos (el valor óptimo) y posteriormente con 4 y 8 clústers. Para evaluar la calidad de cada proceso de agrupación vamos a usar la silueta media. La silueta de cada muestra evalúa como de bien o mal está clasificada la muestra en el clúster al que ha sido asignada. Para ello se usa una fórmula que tiene en cuenta la distancia a las muestras de su clúster y la distancia a las muestras del clúster vecino más cercano.
+
+A la hora de probar el código que se muestra, es importante tener en cuenta que las muestras se generan de forma aleatoria y también que el algoritmo kmeans tiene una inicialización aleatoria. Por lo tanto, en cada ejecución se obtendrá unos resultados ligeramente diferentes.
+
+Lo primero que hacemos es cargar la libreria cluster que contiene las funciones que se necesitan.
+
+
+```{r}
+library(cluster)
+```
+
+Generamos las muestras de forma aleatoria tomando como centro los puntos [0,0] y [5,5]
+
+```{r}
+n <- 150 # número de muestras
+p <-  2 # dimensión
+
+sigma <- 1 # varianza de la distribución
+mean1 <- 0 # centro del primer grupo
+mean2 <- 5 # centro del segundo grupo
+n1 <- round(n/2) # número de muestras del primer grupo
+n2 <- round(n/2) # número de muestras del segundo grupo
+
+# Creamos nuestras matrices de dos dimensiones con los valores normalizados
+x1 <- matrix(rnorm(n1*p, mean=mean1, sd=sigma), n1, p)
+x2 <- matrix(rnorm(n2*p, mean=mean2, sd=sigma), n2, p)
+```
+
+
+Juntamos todas las muestras generadas y las mostramos en una gráfica
+
+```{r}
+x <- rbind(x1,x2)
+plot(x)
+```
+
+Podemos observar que las muestras están claramente separadas en dos grupos.
+Si queremos complicar el problema podemos modificar los puntos centrales (mean1 y mean2) haciendo que estén más próximos a la varianza para que las muestras estén más dispersas.
+
+Aplicamos el algoritmo kmeans (2, 4, 8)
+
+```{r}
+# ajustamos k=2
+fit2 <- kmeans(x, 2)
+y_cluster2 <- fit2$cluster
+
+# ajustamos k=4
+fit4 <- kmeans(x, 4)
+y_cluster4 <- fit4$cluster
+
+# ajustamos k=8
+fit8 <- kmeans(x, 8)
+y_cluster8 <- fit8$cluster
+
+```
+
+
+Las variables y_cluster2, y_cluster4 e y_cluster8 contienen para cada muestra el identificador del clúster a las que han sido asignadas.
+
+```{r}
+y_cluster2
+```
+
+```{r}
+y_cluster8
+```
+
+```{r}
+y_cluster4
+```
+
+Para visualizar los clústers podemos usar la función `clusplot`
+
+
+```{r}
+# Visualizamos para el cluster 2
+clusplot(x, fit2$cluster, color = TRUE, shade = TRUE, labels = 2, lines = 0)
+```
+
+
+
+```{r}
+# Visualizamos para el cluster 4
+clusplot(x, fit4$cluster, color = TRUE, shade = TRUE, labels = 2, lines = 0)
+```
+
+```{r}
+# Visualizamos para el cluster 8
+clusplot(x, fit8$cluster, color = TRUE, shade = TRUE, labels = 2, lines = 0)
+```
+
+Otra forma de visualizar el resultado del proceso de agrupamiento con el siguiente código
+
+
+```{r}
+# Representación para cluster_2
+plot(x[y_cluster2==1,], col='blue', 
+        xlim=c(min(x[,1]), max(x[,1])), 
+        ylim=c(min(x[,2]), max(x[,2])))
+points(x[y_cluster2==2,], col='red')
+```
+
+
+
+```{r}
+# representación para cluster_4
+
+plot(x[y_cluster4==1,],col='blue', xlim=c(min(x[,1]), max(x[,1])), ylim=c(min(x[,2]), max(x[,2])))
+points(x[y_cluster4==2,],col='red')
+points(x[y_cluster4==3,],col='green')
+points(x[y_cluster4==4,],col='black')
+```
+
+
+```{r}
+# representación para cluster_8
+plot(x[y_cluster8==1,],col='blue', xlim=c(min(x[,1]), max(x[,1])), ylim=c(min(x[,2]), max(x[,2])))
+points(x[y_cluster8==2,],col='red')
+points(x[y_cluster8==3,],col='green')
+points(x[y_cluster8==4,],col='black')
+points(x[y_cluster8==5,],col='yellow')
+points(x[y_cluster8==6,],col='purple')
+points(x[y_cluster8==7,],col='cyan')
+points(x[y_cluster8==8,],col='orange')
+```
+
+
+## Evaluación de los resultados
+
+Ahora vamos a evaluar la calidad del proceso de agregación. Para ello usaremos la función `silhouette` que calcula la silueta de cada muestra
+
+```{r}
+d <- daisy(x)
+sk2 <- silhouette(y_cluster2, d)
+sk4 <- silhouette(y_cluster4, d)
+sk8 <- silhouette(y_cluster8, d)
+```
+
+
+La función `silhouette` devuelve para cada muestra, el clúster donde ha sido asignado, el clúster vecino y el valor de la silueta. Por lo tanto, calculando la media de la tercera columna podemos obtener una estimación de la calidad del agrupamiento.
+
+```{r}
+# Verificamos la calidad de sk2
+mean(sk2[,3])
+```
+
+
+```{r}
+# Verificamos la calidad de sk4
+mean(sk4[,3])
+```
+
+
+```{r}
+# Verificamos la calidad de sk2
+mean(sk8[,3])
+```
+
+
+En este ejemplo, al tener dos grupos, evidentemente lo mejor para realizar una agrupación sería en cluster_2, el promedio de la calidad de este es un 73% respecto al 34%-36% respectivamente de cluster4 y cluster8
