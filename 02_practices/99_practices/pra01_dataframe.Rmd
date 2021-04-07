@@ -17,10 +17,10 @@ https://archive.ics.uci.edu/ml/datasets/adult
 Los pasos a realizar son:
 - [X] exploración
 - [X] limpieza
-- [ ] discretización
-- [ ] normalización
-- [ ] creación de nuevo atributo
-- [ ] visualización exhaustiva
+- [X] discretización
+- [X] normalización
+- [X] creación de nuevo atributo
+- [X] visualización exhaustiva
 - [ ] primeras conclusiones
 - [ ] realizar una agrupación con el método de agregación kmeans
 
